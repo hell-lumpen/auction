@@ -1,7 +1,17 @@
 package com.example.auctionback.entities;
 
-public class Item {
+import lombok.Getter;
+import lombok.Setter;
 
-    public void putUpForAuction() {
-    }
+import java.awt.*;
+
+@Setter
+@Getter
+public class Item {
+    private long id;
+    private String name;
+    private String description;
+    private long ownerId;
+    private long auctionId;
+    private Image icon;
 }
