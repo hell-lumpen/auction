@@ -9,9 +9,9 @@ public class Auction {
     private long id;
     private Item item;
 
-    private double current_bid_cost;
-    private double previous_bid_cost;
-    private double bid_min_increase;
+    private float current_bid_cost;
+    private float previous_bid_cost;
+    private float bid_min_increase;
 
     private long current_item_owner_id;
     private long auction_initiator_id;
