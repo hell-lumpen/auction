@@ -7,11 +7,11 @@ import lombok.Setter;
 @Setter
 public class Auction {
     private long id;
-    private Item item;
+    private long itemId;
+    private long time_auction;
 
     private float current_bid_cost;
-    private float previous_bid_cost;
-    private float bid_min_increase;
+    private float bid_min_increase = 50;
 
     private long current_item_owner_id;
     private long auction_initiator_id;

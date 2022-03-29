@@ -12,7 +12,7 @@ import java.util.ArrayList;
 @Setter
 @AllArgsConstructor
 public class Application {
-    private List<Auction> Auctions;
+    public List<Auction> Auctions = new ArrayList<Auction>();
     public List<User> Users = new ArrayList<User>();
 
     public Application() {
