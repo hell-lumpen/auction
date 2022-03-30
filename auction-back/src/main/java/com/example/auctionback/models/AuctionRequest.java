@@ -11,13 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuctionRequest {
-    private long id;
-    private long itemId;
-    private long time_auction;
+    private String id;
+    private String itemId;
+    private String time_auction;
 
     private float current_bid_cost;
     private float bid_min_increase;
 
-    private long current_item_owner_id;
-    private long auction_initiator_id;
+    private String current_item_owner_id;
+    private String auction_initiator_id;
 }

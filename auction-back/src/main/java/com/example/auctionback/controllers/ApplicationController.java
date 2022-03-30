@@ -12,11 +12,14 @@ import com.example.auctionback.exceptions.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/auction")
 public class ApplicationController {
-    private static Application app = new Application();
+
+    private final float MIN_BID_INCREASE = 50f;
+    private static final Application app = new Application();
 
     @GetMapping("/all")
     public List<Auction> getsAuctions(){
@@ -25,9 +28,9 @@ public class ApplicationController {
 
     @GetMapping("/{id}")
     public Auction getsAuction(@PathVariable("id") String auctionId)throws AuctionNotExistException{
-        for (var f : app.getAuctions())
-            if (f.getId() == Long.parseLong(auctionId))
-                return f;
+        for (var auction : app.getAuctions())
+            if (Objects.equals(auction.getId(), auctionId))
+                return auction;
 
         throw new AuctionNotExistException();
     }
@@ -38,23 +41,24 @@ public class ApplicationController {
                             @RequestBody AuctionRequest auctionRequest)
             throws AuctionExistException, ItemExistException, UserNotExistException {
 
-        for (var f : app.getAuctions()){
-            if (f.getId() == auctionRequest.getId())
+        for (var auction : app.getAuctions()){
+            if (Objects.equals(auction.getId(), auctionRequest.getId()))
                 throw new AuctionExistException();
 
-            if (f.getItemId() == auctionRequest.getItemId())
+            if (Objects.equals(auction.getItemId(), auctionRequest.getItemId()))
                 throw new AuctionExistException();
         }
 
-        Auction auc = new Auction();
-        auc.setId(auctionRequest.getId());
-        auc.setItemId(Long.parseLong(itemId));
-        auc.setTime_auction(auctionRequest.getTime_auction());
-        auc.setCurrent_bid_cost(auctionRequest.getCurrent_bid_cost());
-        auc.setCurrent_item_owner_id(Long.parseLong(userId));
-        auc.setAuction_initiator_id(Long.parseLong(userId));
-        app.Auctions.add(auc);
-        return auc;
+        Auction auction = new Auction(auctionRequest.getId(),
+                itemId,
+                auctionRequest.getTime_auction(),
+                auctionRequest.getCurrent_bid_cost(),
+                MIN_BID_INCREASE,
+                userId,
+                userId);
+
+        app.Auctions.add(auction);
+        return auction;
     }
 
     @GetMapping("/user/{id}")

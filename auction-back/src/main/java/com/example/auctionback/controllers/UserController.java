@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
-public class UserController{
+public class UserController {
 
     public static User getUser(String userId, List<User> users) throws UserNotExistException {
         if (users == null)
@@ -57,7 +58,7 @@ public class UserController{
             throw new ItemNotExistException();
 
         for (Item item : user.getItems()) {
-            if (item.getId() == Integer.parseInt(itemId)){
+            if (Objects.equals(item.getId(), itemId)){
                 return item;
             }
         }
@@ -72,12 +73,12 @@ public class UserController{
         var user = findUser(userId, users);
         if (user.getItems() != null)
             for (Item item : user.getItems())
-                if (item.getId() == itemRequest.getId())
+                if (Objects.equals(item.getId(), itemRequest.getId()))
                     throw new ItemExistException();
 
 
         var item = new Item(itemRequest.getId(), itemRequest.getName(), itemRequest.getDescription(),
-                Long.parseLong(userId), itemRequest.getAuctionId());
+                userId, itemRequest.getAuctionId());
 
         user.addItem(item);
         return item;

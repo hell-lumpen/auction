@@ -11,9 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ItemRequest {
-    private long id;
+    private String id;
     private String name;
     private String description;
-    private long ownerId;
-    private long auctionId;
+    private String ownerId;
+    private String auctionId;
 }

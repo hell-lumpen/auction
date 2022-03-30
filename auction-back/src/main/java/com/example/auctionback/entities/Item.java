@@ -10,11 +10,11 @@ import java.awt.*;
 @Getter
 @AllArgsConstructor
 public class Item {
-    private long id;
+    private String id;
     private String name;
     private String description;
-    private long ownerId;
-    private long auctionId;
+    private String ownerId;
+    private String auctionId;
 //    private Image icon;
 
 }
