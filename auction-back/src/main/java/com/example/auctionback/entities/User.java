@@ -13,8 +13,9 @@ import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class User {
-    private long userId;
+    private String userId;
     private String name;
     private List<Item> items;
     //    private Image icon;

@@ -28,36 +28,45 @@ public class ApplicationController {
 
     @GetMapping("/{id}")
     public Auction getsAuction(@PathVariable("id") String auctionId)throws AuctionNotExistException{
-        for (var auction : app.getAuctions())
-            if (Objects.equals(auction.getId(), auctionId))
+
+        for (var auction : app.getAuctions()) {
+            if (Objects.equals(auction.getId(), auctionId)) {
                 return auction;
+            }
+        }
 
         throw new AuctionNotExistException();
     }
 
     @PostMapping("/user/{id}/items/{id_item}/choose")
     public Auction postAuction(@PathVariable("id") String userId,
-                            @PathVariable("id_item") String itemId,
-                            @RequestBody AuctionRequest auctionRequest)
+                               @PathVariable("id_item") String itemId,
+                               @RequestBody AuctionRequest auctionRequest)
             throws AuctionExistException, ItemExistException, UserNotExistException {
 
-        for (var auction : app.getAuctions()){
-            if (Objects.equals(auction.getId(), auctionRequest.getId()))
-                throw new AuctionExistException();
+        // TODO: добавить проверку на существование таких userId и itemId
 
-            if (Objects.equals(auction.getItemId(), auctionRequest.getItemId()))
+        for (var auction : app.getAuctions()) {
+
+            if (Objects.equals(auction.getId(), auctionRequest.getId())) {
                 throw new AuctionExistException();
+            }
+
+            if (Objects.equals(auction.getItemId(), auctionRequest.getItemId())) {
+                throw new AuctionExistException();
+            }
         }
 
         Auction auction = new Auction(auctionRequest.getId(),
                 itemId,
-                auctionRequest.getTime_auction(),
-                auctionRequest.getCurrent_bid_cost(),
+                auctionRequest.getTimeAuction(),
+                auctionRequest.getCurrentBidCost(),
                 MIN_BID_INCREASE,
                 userId,
                 userId);
 
         app.Auctions.add(auction);
+
         return auction;
     }
 
@@ -81,7 +90,7 @@ public class ApplicationController {
 
     @GetMapping("/user/get_users")
     public List<User> getUsers() {
-        return UserController.getUsers(app.getUsers());
+        return app.getUsers();
     }
 
     @PostMapping("/user/{id}/items")

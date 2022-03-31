@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRequest {
-    private long userId;
+    private String userId;
     private String name;
     private List<Item> items;
 }
