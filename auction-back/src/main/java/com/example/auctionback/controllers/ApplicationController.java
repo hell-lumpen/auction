@@ -52,7 +52,7 @@ public class ApplicationController {
                 throw new AuctionExistException();
             }
 
-            if (Objects.equals(auction.getItemId(), auctionRequest.getItemId())) {
+            if (Objects.equals(auction.getItemId(), itemId)) {
                 throw new AuctionExistException();
             }
         }
