@@ -1,14 +1,19 @@
-package com.example.auctionback.entities;
+package com.example.auctionback.database.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@Entity
 public class Auction {
-    private String id;
+    @Id
+    private String auctionId;
+    
     private String itemId;
     private String time_auction;
 

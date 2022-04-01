@@ -1,13 +1,13 @@
 package com.example.auctionback.controllers;
 
 
-import com.example.auctionback.entities.Auction;
+import com.example.auctionback.database.entities.Auction;
 import com.example.auctionback.models.AuctionRequest;
 import com.example.auctionback.models.ItemRequest;
 import com.example.auctionback.models.UserRequest;
-import com.example.auctionback.entities.Application;
-import com.example.auctionback.entities.Item;
-import com.example.auctionback.entities.User;
+import com.example.auctionback.database.entities.Application;
+import com.example.auctionback.database.entities.Item;
+import com.example.auctionback.database.entities.User;
 import com.example.auctionback.exceptions.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +30,7 @@ public class ApplicationController {
     public Auction getsAuction(@PathVariable("id") String auctionId)throws AuctionNotExistException{
 
         for (var auction : app.getAuctions()) {
-            if (Objects.equals(auction.getId(), auctionId)) {
+            if (Objects.equals(auction.getAuctionId(), auctionId)) {
                 return auction;
             }
         }
@@ -48,7 +48,7 @@ public class ApplicationController {
 
         for (var auction : app.getAuctions()) {
 
-            if (Objects.equals(auction.getId(), auctionRequest.getId())) {
+            if (Objects.equals(auction.getAuctionId(), auctionRequest.getId())) {
                 throw new AuctionExistException();
             }
 

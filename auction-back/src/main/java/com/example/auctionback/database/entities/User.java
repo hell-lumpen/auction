@@ -1,20 +1,22 @@
-package com.example.auctionback.entities;
+package com.example.auctionback.database.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.awt.*;
-import java.lang.reflect.Array;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@Entity
 public class User {
+    @Id
     private String userId;
     private String name;
     private List<Item> items;

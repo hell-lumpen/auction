@@ -1,6 +1,6 @@
 package com.example.auctionback.controllers;
 
-import com.example.auctionback.entities.*;
+import com.example.auctionback.database.entities.*;
 import com.example.auctionback.models.UserRequest;
 import com.example.auctionback.models.ItemRequest;
 import com.example.auctionback.exceptions.*;
@@ -62,7 +62,7 @@ public class UserController {
         }
 
         for (Item item : user.getItems()) {
-            if (Objects.equals(item.getId(), itemId)){
+            if (Objects.equals(item.getItemId(), itemId)){
                 return item;
             }
         }
@@ -79,7 +79,7 @@ public class UserController {
 
         if (user.getItems() != null) {
             for (Item item : user.getItems()) {
-                if (Objects.equals(item.getId(), itemRequest.getId()))
+                if (Objects.equals(item.getItemId(), itemRequest.getId()))
                     throw new ItemExistException();
             }
         }
