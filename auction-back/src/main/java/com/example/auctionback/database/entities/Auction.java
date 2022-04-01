@@ -9,9 +9,7 @@ import javax.persistence.Id;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class Auction {
-    @Id
     private String auctionId;
     
     private String itemId;

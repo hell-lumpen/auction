@@ -4,11 +4,13 @@ package com.example.auctionback.controllers;
 import com.example.auctionback.database.entities.Auction;
 import com.example.auctionback.models.AuctionRequest;
 import com.example.auctionback.models.ItemRequest;
+import com.example.auctionback.models.ItemResponse;
 import com.example.auctionback.models.UserRequest;
 import com.example.auctionback.database.entities.Application;
 import com.example.auctionback.database.entities.Item;
 import com.example.auctionback.database.entities.User;
-import com.example.auctionback.exceptions.*;
+import com.example.auctionback.controllers.exceptions.*;
+import com.example.auctionback.service.ItemService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,12 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/auction")
 public class ApplicationController {
+
+    private final ItemService itemService;
+
+    public ApplicationController(ItemService itemService) {
+        this.itemService = itemService;
+    }
 
     private final float MIN_BID_INCREASE = 50f;
     private static final Application app = new Application();
@@ -94,9 +102,9 @@ public class ApplicationController {
     }
 
     @PostMapping("/user/{id}/items")
-    public Item postItem(@PathVariable("id") String userId,
-                         @RequestBody ItemRequest itemRequest) throws ItemExistException, UserNotExistException {
-        return UserController.postItem(userId, itemRequest, app.Users);
+    public ItemResponse postItem(@PathVariable("id") String userId,
+                                 @RequestBody ItemRequest itemRequest) throws ItemExistException, UserNotExistException {
+        return itemService.saveItem(itemRequest);
     }
 
     @PostMapping("/user")

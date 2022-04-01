@@ -1,9 +1,9 @@
 package com.example.auctionback.database.entities;
 
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Setter
 @Getter
@@ -12,6 +12,9 @@ import javax.persistence.Id;
 @Entity
 public class Item {
     @Id
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid")
+    @Column(length = 32, updatable = false, nullable = false)
     private String itemId;
     private String name;
     private String description;

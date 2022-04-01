@@ -1,17 +1,13 @@
 package com.example.auctionback.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Data
 @Setter
 @Getter
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AuctionRequest {
+@NoArgsConstructor
+public class AuctionResponse {
     private String id;
     private String itemId;
     private String timeAuction;

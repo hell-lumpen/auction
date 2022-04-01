@@ -1,15 +1,19 @@
 package com.example.auctionback.controllers;
 
+import com.example.auctionback.service.*;
 import com.example.auctionback.database.entities.*;
 import com.example.auctionback.models.UserRequest;
 import com.example.auctionback.models.ItemRequest;
-import com.example.auctionback.exceptions.*;
+import com.example.auctionback.controllers.exceptions.*;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 
+@AllArgsConstructor
 public class UserController {
+    private final ItemService itemService;
 
     public static User getUser(String userId, List<User> users) throws UserNotExistException {
 
@@ -74,6 +78,8 @@ public class UserController {
     public static Item postItem(@PathVariable("id") String userId,
                                 @RequestBody ItemRequest itemRequest,
                                 List<User> users) throws ItemExistException, UserNotExistException {
+
+
 
         var user = findUser(userId, users);
 

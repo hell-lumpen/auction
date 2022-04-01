@@ -14,9 +14,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class User {
-    @Id
     private String userId;
     private String name;
     private List<Item> items;
