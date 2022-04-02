@@ -35,7 +35,7 @@ public class ApplicationController {
     }
 
     @GetMapping("/{id}")
-    public Auction getsAuction(@PathVariable("id") String auctionId)throws AuctionNotExistException{
+    public Auction getsAuction(@PathVariable("id") String auctionId) throws AuctionNotExistException{
 
         for (var auction : app.getAuctions()) {
             if (Objects.equals(auction.getAuctionId(), auctionId)) {
@@ -46,7 +46,7 @@ public class ApplicationController {
         throw new AuctionNotExistException();
     }
 
-    @PostMapping("/user/{id}/items/{id_item}/choose")
+    @PostMapping("/user/{id}/items/{id_item}/choose")  // http://localhost:8080/create_auction
     public Auction postAuction(@PathVariable("id") String userId,
                                @PathVariable("id_item") String itemId,
                                @RequestBody AuctionRequest auctionRequest)
