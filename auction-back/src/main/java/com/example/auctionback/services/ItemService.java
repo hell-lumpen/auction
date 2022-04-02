@@ -19,6 +19,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
 
     public ItemResponse getItemFromDB(Long itemId) throws ItemNotFoundException {
+
         Optional<Item> existedItem = itemRepository.findById(itemId);
         Item slave = existedItem.orElseThrow(ItemNotFoundException::new); // по идее нахер не нужно ибо такая ошибка тут невозможна
 

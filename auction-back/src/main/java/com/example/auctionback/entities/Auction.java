@@ -19,6 +19,15 @@ public class Auction {
     private String name;
     private Long itemId;
     private float bidCost;
-    private float minBidIncrease; // need to be final
+    private float minBidIncrease;
     private Long bidOwnerId;
+
+    public Auction(String name, Long itemId, float bidCost, float minBidIncrease, Long bidOwnerId) {
+        this.name = name;
+        this.itemId = itemId;
+        this.bidCost = bidCost;
+        this.minBidIncrease = minBidIncrease;
+        this.bidOwnerId = bidOwnerId;
+    }
+
 }

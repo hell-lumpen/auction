@@ -26,7 +26,7 @@ public class SlaveService {
     private final SlaveRepository slaveRepository;
     private final ItemRepository itemRepository;
 
-    public SlaveResponse saveSlaveInDB(SlaveRequest slaveRequest){
+    public SlaveResponse saveSlaveInDB(SlaveRequest slaveRequest) {
 
         Slave slave = new Slave(slaveRequest.getName(),
                 slaveRequest.getMoney(),
@@ -44,6 +44,7 @@ public class SlaveService {
     }
 
     public SlaveResponse getSlaveFromDB(Long slaveId) throws SlaveNotExistException {
+
         Optional<Slave> existedSlave = slaveRepository.findById(slaveId);
         Slave slave = existedSlave.orElseThrow(SlaveNotExistException::new); // по идее нахер не нужно ибо такая ошибка тут невозможна
 
@@ -82,7 +83,8 @@ public class SlaveService {
     }
 
     public ItemResponse addItem(Long slaveId, ItemRequest itemRequest)
-                                                    throws ItemExistException, SlaveNotExistException{
+                                                    throws ItemExistException, SlaveNotExistException {
+
         slaveRepository.findById(slaveId).orElseThrow(SlaveNotExistException::new);
         Item item = new Item(itemRequest.getName(),
                 itemRequest.getDescription(),

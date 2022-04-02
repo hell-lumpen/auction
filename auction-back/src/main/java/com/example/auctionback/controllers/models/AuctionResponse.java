@@ -8,10 +8,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuctionResponse {
-    private long id;
+
+    private Long id;
     private String name;
-    private long itemId;
-    private int bidCoast;
-    private int bidMinIncrease;
-    private long bidOwnerId;
+    private Long itemId;
+    private float bidCost;
+    private float minBidIncrease;
+    private Long bidOwnerId;
+
+    public AuctionResponse(String name, Long itemId, float bidCost, float minBidIncrease, Long bidOwnerId) {
+        this.name = name;
+        this.itemId = itemId;
+        this.bidCost = bidCost;
+        this.minBidIncrease = minBidIncrease;
+        this.bidOwnerId = bidOwnerId;
+    }
 }
