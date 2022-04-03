@@ -50,4 +50,13 @@ public class SlaveController {
             throws ItemNotFoundException, SlaveNotExistException {
         return slaveService.getAllUserItemsFromDB(slaveId);
     }
+
+
+    @DeleteMapping("/{id}")
+    public SlaveResponse deleteSlave(@PathVariable("id") Long slaveId)
+            throws SlaveNotExistException {
+        //todo: delete items this user
+        return slaveService.deleteSlave(slaveId);
+
+    }
 }

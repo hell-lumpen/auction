@@ -33,13 +33,21 @@ public class AuctionController {
     }
 
     @PutMapping("/new_bid")
-    public AuctionResponse createNewBid(@RequestBody BidRequest bidRequest) throws NotEnoughtMoneyException, SlaveNotExistException, AuctionNotFoundException {
+    public AuctionResponse createNewBid(@RequestBody BidRequest bidRequest)
+            throws NotEnoughtMoneyException, SlaveNotExistException, AuctionNotFoundException {
         return auctionService.updateAuction(bidRequest);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteAuction(@PathVariable("id") Long auctionId) throws AuctionNotFoundException, NotEnoughtMoneyException {
+    public String deleteAuction(@PathVariable("id") Long auctionId)
+            throws AuctionNotFoundException {
         return auctionService.deleteAuction(auctionId);
+    }
+
+    @DeleteMapping("/{id}/finish")
+    public String finishAuction(@PathVariable("id") Long auctionId)
+            throws AuctionNotFoundException {
+        return auctionService.finishAuction(auctionId);
     }
 
 }

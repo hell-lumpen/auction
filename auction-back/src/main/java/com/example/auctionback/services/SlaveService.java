@@ -98,4 +98,14 @@ public class SlaveService {
                 item.getDescription(),
                 item.getOwnerId());
     }
+
+    public SlaveResponse deleteSlave(Long slaveId) throws SlaveNotExistException {
+        Slave slave = slaveRepository.findById(slaveId).orElseThrow(SlaveNotExistException::new);
+        slaveRepository.delete(slave);
+        return new SlaveResponse(slave.getId(),
+                slave.getName(),
+                slave.getMoney(),
+                slave.getReservedMoney(),
+                slave.getPassword());
+    }
 }

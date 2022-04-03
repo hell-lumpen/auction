@@ -93,6 +93,7 @@ public class AuctionService {
 
         auction.setBidCost(bidRequest.getCurrentBid());
         auction.setBidOwnerId(bidRequest.getOwnerId());
+        auctionRepository.save(auction);
         return null;
     }
 
@@ -109,7 +110,7 @@ public class AuctionService {
         return null;
     }
 
-    public void finishAuction(Long auctionId)
+    public String finishAuction(Long auctionId)
             throws AuctionNotFoundException {
 
         Auction auction = auctionRepository.findById(auctionId).orElseThrow(AuctionNotFoundException::new);
@@ -121,6 +122,7 @@ public class AuctionService {
         }
 
         auctionRepository.deleteById(auctionId);
+        return null;
     }
 
     private void lockMoney(BidRequest bidRequest) throws SlaveNotExistException, NotEnoughtMoneyException {
@@ -133,6 +135,7 @@ public class AuctionService {
 
         slave.setReservedMoney(slave.getReservedMoney() + bidRequest.getCurrentBid());
         slave.setMoney(slave.getMoney() - slave.getReservedMoney());
+        slaveRepository.save(slave);
     }
 
     private void unlockMoney(BidRequest bidRequest) throws SlaveNotExistException {
@@ -143,6 +146,7 @@ public class AuctionService {
 
         slave.setReservedMoney(slave.getReservedMoney() - bidRequest.getCurrentBid());
         slave.setMoney(slave.getMoney() + slave.getReservedMoney());
+        slaveRepository.save(slave);
     }
 
     private void transferMoney(Long sourceId, Long destinationId, float cost) {
@@ -152,10 +156,14 @@ public class AuctionService {
 
         slave1.setReservedMoney(slave1.getReservedMoney() - cost);
         slave2.setMoney(slave2.getMoney() + cost);
+        slaveRepository.save(slave1);
+        slaveRepository.save(slave2);
+
     }
 
     private void transferItem(Long destinationId, Long itemId){
         Item item = itemRepository.findById(itemId).orElseThrow();
         item.setOwnerId(destinationId);
+        itemRepository.save(item);
     }
 }
