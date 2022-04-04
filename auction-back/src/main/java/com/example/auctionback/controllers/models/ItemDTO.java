@@ -1,15 +1,17 @@
 package com.example.auctionback.controllers.models;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ItemResponse {
+@Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ItemDTO {
     private long id;
+
     private String name;
     private String description;
+
     private long ownerId;
 }

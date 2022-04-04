@@ -1,13 +1,8 @@
 package com.example.auctionback.controllers;
 
-import com.example.auctionback.controllers.models.ItemRequest;
-import com.example.auctionback.controllers.models.ItemResponse;
-import com.example.auctionback.controllers.models.SlaveRequest;
-import com.example.auctionback.controllers.models.SlaveResponse;
+import com.example.auctionback.controllers.models.ItemDTO;
 import com.example.auctionback.exceptions.ItemNotFoundException;
-import com.example.auctionback.exceptions.SlaveNotExistException;
 import com.example.auctionback.services.ItemService;
-import com.example.auctionback.services.SlaveService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,19 +15,19 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{id}")
-    public ItemResponse getSlave(@PathVariable("id") Long itemId) throws ItemNotFoundException {
+    public ItemDTO getSlave(@PathVariable("id") Long itemId) throws ItemNotFoundException {
         //todo: get all items
-        return itemService.getItemFromDB(itemId);
+        return itemService.getItem(itemId);
     }
 
-    @GetMapping("/get_all")
-    public List<ItemResponse> getSlaves()  {
-        return itemService.getAllItemFromDB();
+    @GetMapping("/all")
+    public List<ItemDTO> getSlaves()  {
+        return itemService.getAllItem();
     }
 
-    @PostMapping("/new_item")
-    public ItemResponse slaveRegistration(@RequestBody ItemRequest itemRequest) {
+    @PostMapping("")
+    public ItemDTO slaveRegistration(@RequestBody ItemDTO itemRequest) {
 
-        return itemService.saveItemInDB(itemRequest);
+        return itemService.saveItem(itemRequest);
     }
 }

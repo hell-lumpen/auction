@@ -2,16 +2,20 @@ package com.example.auctionback.controllers.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuctionRequest {
+public class LotDTO {
     private long id;
-    private String name;
+
+    private String title;
     private long itemId;
-    private int bidCost;
-    private int minBidIncrease;
+
+    private float bidCost;
+    private float minBidIncrease;
+
     private long bidOwnerId;
 }

@@ -3,6 +3,6 @@ package com.example.auctionback.exceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.CONFLICT, reason = "Auction already exist")  // 409
-public class AuctionAlreadyExistException extends Exception {
+@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Lot Was Not Found")
+public class LotNotFoundException extends Exception {
 }
