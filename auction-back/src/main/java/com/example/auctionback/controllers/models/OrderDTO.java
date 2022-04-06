@@ -4,16 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BidderDTO {
-    private Long id;
+public class OrderDTO {
+    private Long orderId;
 
-    private String name;
-    private String money;
-    private String reservedMoney;
+    private Long orderOwnerId;
+    private String orderPrice;
+    private Long itemId;
 
-    private String nickname;
-    private String password;
+    private Date createdAt;
+    private boolean orderStatus;
 }

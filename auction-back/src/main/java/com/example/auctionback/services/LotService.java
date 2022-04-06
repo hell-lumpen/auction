@@ -1,7 +1,7 @@
 package com.example.auctionback.services;
 
 import com.example.auctionback.controllers.models.LotDTO;
-import com.example.auctionback.controllers.models.BidDTO;
+import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.Lot;
 import com.example.auctionback.database.entities.Item;
 import com.example.auctionback.database.entities.Bidder;
@@ -23,7 +23,7 @@ public class LotService {
     private final ItemRepository itemRepository;
     private final BidderRepository bidderRepository;
 
-    public LotDTO createNewAuction(LotDTO lotDTO)
+    public LotDTO createNewLot(LotDTO lotDTO)
             throws LotAlreadyExistException, ItemNotFoundException {
 
         if (!itemRepository.existsById(lotDTO.getItemId()))
@@ -32,42 +32,57 @@ public class LotService {
         if (lotRepository.existsByItemId(lotDTO.getItemId()))
             throw new LotAlreadyExistException();
 
-        Lot lot = Lot.builder().title(lotDTO.getTitle()).itemId(lotDTO.getItemId()).bidCost(lotDTO.getBidCost())
-                .minBidIncrease(lotDTO.getMinBidIncrease()).bidOwnerId(lotDTO.getBidOwnerId()).build();
+        Lot lot = Lot.builder()
+                .id(lotDTO.getId())
+                .title(lotDTO.getTitle())
+                .description(lotDTO.getDescription())
+                .itemId(lotDTO.getItemId())
+                .minBidIncrease(lotDTO.getMinBidIncrease())
+                .ownerId(lotDTO.getOwnerId())
+                .build();
 
         lotRepository.save(lot);
+        // todo: mapper https://www.baeldung.com/entity-to-and-from-dto-for-a-java-spring-application
         return LotDTO.builder()
-                .id(lot.getId())
-                .title(lot.getTitle())
-                .itemId(lot.getItemId())
-                .bidCost(lot.getBidCost())
-                .minBidIncrease(lot.getMinBidIncrease())
-                .bidOwnerId(lot.getBidOwnerId())
+                .id(lotDTO.getId())
+                .title(lotDTO.getTitle())
+                .description(lotDTO.getDescription())
+                .itemId(lotDTO.getItemId())
+                .minBidIncrease(lotDTO.getMinBidIncrease())
+                .ownerId(lotDTO.getOwnerId())
                 .build();
 
     }
 
-    public LotDTO getAuction(Long auctionId) throws LotNotFoundException {
-        Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
+    public LotDTO getLot(Long lotId) throws LotNotFoundException {
+        Lot lot = lotRepository.findById(lotId).orElseThrow(LotNotFoundException::new);
 
-        return LotDTO.builder().id(lot.getId()).
-                title(lot.getTitle()).itemId(lot.getItemId()).
-                bidCost(lot.getBidCost()).minBidIncrease(lot.getMinBidIncrease())
-                .bidOwnerId(lot.getBidOwnerId()).build();
+        return LotDTO.builder()
+                .id(lot.getId())
+                .title(lot.getTitle())
+                .description(lot.getDescription())
+                .itemId(lot.getItemId())
+                .minBidIncrease(lot.getMinBidIncrease())
+                .bidBidOwnerId(lot.getBidOwnerId())
+                .build();
     }
 
-    public List<LotDTO> getAllAuctions() {
+    public List<LotDTO> getAllLots() {
         List<Lot> allLots = (List<Lot>) lotRepository.findAll();
 
         return allLots.stream()
-                .map(lot -> LotDTO.builder().id(lot.getId()).
-                        title(lot.getTitle()).itemId(lot.getItemId()).
-                        bidCost(lot.getBidCost()).minBidIncrease(lot.getMinBidIncrease())
-                        .bidOwnerId(lot.getBidOwnerId()).build())
+                .map(lot -> LotDTO.builder()
+                        .id(lot.getId())
+                        .title(lot.getTitle())
+                        .description(lot.getDescription())
+                        .itemId(lot.getItemId())
+                        .minBidIncrease(lot.getMinBidIncrease())
+                        .ownerId(lot.getOwnerId())
+                        .build())
                 .collect(Collectors.toList());
     }
 
-    public LotDTO updateAuction(BidDTO bidRequest)
+    public LotDTO updateAuction(OrderDTO bidRequest)
             throws LotNotFoundException, BidderNotFoundException, NotEnoughtMoneyException {
 
         //todo: проверить на то что ставка проходит минимальный increase
@@ -112,7 +127,7 @@ public class LotService {
         return null;
     }
 
-    private void lockMoney(BidDTO bidRequest) throws BidderNotFoundException, NotEnoughtMoneyException {
+    private void lockMoney(OrderDTO bidRequest) throws BidderNotFoundException, NotEnoughtMoneyException {
 
         Bidder bidder = bidderRepository.findById(bidRequest.getNewBidderId()).
                 orElseThrow(BidderNotFoundException::new);
@@ -125,7 +140,7 @@ public class LotService {
         bidderRepository.save(bidder);
     }
 
-    private void unlockMoney(BidDTO bidRequest) throws BidderNotFoundException {
+    private void unlockMoney(OrderDTO bidRequest) throws BidderNotFoundException {
 
         Lot lot = lotRepository.findById(bidRequest.getLotId()).orElseThrow();
         Bidder bidder = bidderRepository.findById(lot.getBidOwnerId()).
@@ -153,4 +168,6 @@ public class LotService {
         item.setOwnerId(destinationId);
         itemRepository.save(item);
     }
+
+
 }

@@ -10,14 +10,15 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "Bidder")
 public class Bidder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-    private float money;
-    private float reservedMoney;
+    private String money;
+    private String reservedMoney;
 
     private String nickname;
     private String password;

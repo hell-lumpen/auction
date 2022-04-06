@@ -1,8 +1,10 @@
 package com.example.auctionback.database.entities;
 
 import lombok.*;
+import org.springframework.core.io.ResourceLoader;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Setter
@@ -16,9 +18,16 @@ public class Lot {
     private Long id;
 
     private String title;
-    private Long itemId;
-    private float bidCost;
-    private float minBidIncrease;
+    private String description;
 
-    private Long bidOwnerId;
+    private Long itemId;
+    private Long lastOrderId;
+    private String minBidIncrease;
+
+    private Long ownerId;
+
+    private boolean lotStatus = false;
+
+    private Date createAt;
+    private Date finishAt;
 }

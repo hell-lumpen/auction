@@ -9,13 +9,13 @@ import lombok.Data;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LotDTO {
-    private long id;
-
+    private Long id;
     private String title;
-    private long itemId;
+    private String description;
+    private Long itemId;
+    private String current_cost;
+    private String minBidIncrease;
 
-    private float bidCost;
-    private float minBidIncrease;
+    private Long ownerId;
 
-    private long bidOwnerId;
 }
