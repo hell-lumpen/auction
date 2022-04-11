@@ -23,7 +23,8 @@ public class Order {
     private Long orderOwnerId;
     private String orderPrice;
     private Long itemId;
+    private Long auctionId;
 
     private Date createdAt;
-    private boolean orderStatus; // true - победа в аукционе
+    private boolean orderStatus; // true - текущий ордер или нет
 }

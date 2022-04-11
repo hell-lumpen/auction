@@ -5,6 +5,8 @@ import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.Lot;
 import com.example.auctionback.database.entities.Item;
 import com.example.auctionback.database.entities.Bidder;
+import com.example.auctionback.database.entities.Order;
+import com.example.auctionback.database.repository.OrderRepository;
 import com.example.auctionback.exceptions.*;
 import com.example.auctionback.database.repository.LotRepository;
 import com.example.auctionback.database.repository.ItemRepository;
@@ -12,6 +14,7 @@ import com.example.auctionback.database.repository.BidderRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +25,8 @@ public class LotService {
     private final LotRepository lotRepository;
     private final ItemRepository itemRepository;
     private final BidderRepository bidderRepository;
+    private final OrderRepository orderRepository;
+
 
     public LotDTO createNewLot(LotDTO lotDTO)
             throws LotAlreadyExistException, ItemNotFoundException {
@@ -63,7 +68,6 @@ public class LotService {
                 .description(lot.getDescription())
                 .itemId(lot.getItemId())
                 .minBidIncrease(lot.getMinBidIncrease())
-                .bidBidOwnerId(lot.getBidOwnerId())
                 .build();
     }
 
@@ -82,12 +86,49 @@ public class LotService {
                 .collect(Collectors.toList());
     }
 
-    public LotDTO updateAuction(OrderDTO bidRequest)
+    public OrderDTO updateAuction(OrderDTO bidRequest)
             throws LotNotFoundException, BidderNotFoundException, NotEnoughtMoneyException {
 
+        List<Order> allOrders = orderRepository.findByAuctionId(bidRequest.getAuctionId());
+        Order currentOrder = null;
+        for (var o : allOrders)
+            if (o.isOrderStatus())
+            {
+                currentOrder = o;
+                break;
+            }
+
+        Order newOrder = new Order(
+                bidRequest.getOrderId(),
+                bidRequest.getOrderOwnerId(),
+                bidRequest.getOrderPrice(),
+                bidRequest.getItemId(),
+                bidRequest.getAuctionId(),
+                new Date(),
+                false
+                );
+
+        if (newOrder.getOrderPrice() <= currentOrder.getOrderPrice())
+            throw NotEnoughtMoneyException;
+        else
+            newOrder.setOrderStatus(true);
+
+
+        if (currentOrder != null) {
+            currentOrder.setOrderStatus(false);
+            this.unlockMoney(currentOrder.getOrderOwnerId(), currentOrder.getOrderPrice());
+        }
+
+        this.lockMoney(newOrder.getOrderOwnerId(), newOrder.getOrderPrice())
+        orderRepository.save(currentOrder);
+        orderRepository.save(newOrder);
+        return newOrder;
+    /*
         //todo: проверить на то что ставка проходит минимальный increase
         Lot lot = lotRepository.findById(bidRequest.getLotId()).
                 orElseThrow(LotNotFoundException::new);
+
+
 
         this.lockMoney(bidRequest);
         if (lot.getBidOwnerId() != 0)
@@ -96,10 +137,11 @@ public class LotService {
         lot.setBidCost(bidRequest.getNextBid());
         lot.setBidOwnerId(bidRequest.getNewBidderId());
         lotRepository.save(lot);
-        return null;
+        return null;*/
+
     }
 
-    public String deleteAuction(Long auctionId)
+/*    public String deleteAuction(Long auctionId)
             throws LotNotFoundException {
 
         Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
@@ -111,9 +153,36 @@ public class LotService {
         lotRepository.deleteById(auctionId);
         return null;
     }
-
+*/
     public String finishAuction(Long auctionId)
             throws LotNotFoundException {
+
+        Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
+
+        List<Order> allOrders = orderRepository.findByAuctionId(auctionId);
+        Order currentOrder = null;
+        for (var o : allOrders)
+            if (o.isOrderStatus())
+            {
+                currentOrder = o;
+                break;
+            }
+
+
+        lot.setFinishAt(new Date());
+        lot.setLotStatus(true);
+
+
+        if (currentOrder != null){
+            Long userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerId(); //get owner id item
+            this.transferMoney(currentOrder.getOrderOwnerId(), userId, currentOrder.getOrderPrice());
+            this.transferItem(currentOrder.getOrderOwnerId(), lot.getItemId());
+        }
+
+
+
+
+
 
         Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
 
@@ -127,8 +196,8 @@ public class LotService {
         return null;
     }
 
-    private void lockMoney(OrderDTO bidRequest) throws BidderNotFoundException, NotEnoughtMoneyException {
-
+    private void lockMoney(Long userId, Long money) throws BidderNotFoundException, NotEnoughtMoneyException {
+/*
         Bidder bidder = bidderRepository.findById(bidRequest.getNewBidderId()).
                 orElseThrow(BidderNotFoundException::new);
 
@@ -137,18 +206,18 @@ public class LotService {
 
         bidder.setReservedMoney(bidder.getReservedMoney() + bidRequest.getNextBid());
         bidder.setMoney(bidder.getMoney() - bidder.getReservedMoney());
-        bidderRepository.save(bidder);
+        bidderRepository.save(bidder);*/
     }
 
-    private void unlockMoney(OrderDTO bidRequest) throws BidderNotFoundException {
+    private void unlockMoney(Long userId, Long money) throws BidderNotFoundException {
 
-        Lot lot = lotRepository.findById(bidRequest.getLotId()).orElseThrow();
+        /*Lot lot = lotRepository.findById(bidRequest.getLotId()).orElseThrow();
         Bidder bidder = bidderRepository.findById(lot.getBidOwnerId()).
                 orElseThrow(BidderNotFoundException::new);
 
         bidder.setReservedMoney(bidder.getReservedMoney() - bidRequest.getNextBid());
         bidder.setMoney(bidder.getMoney() + bidder.getReservedMoney());
-        bidderRepository.save(bidder);
+        bidderRepository.save(bidder);*/
     }
 
     private void transferMoney(Long sourceId, Long destinationId, float cost) {
@@ -168,6 +237,5 @@ public class LotService {
         item.setOwnerId(destinationId);
         itemRepository.save(item);
     }
-
 
 }

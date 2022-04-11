@@ -15,6 +15,7 @@ public class OrderDTO {
     private Long orderOwnerId;
     private String orderPrice;
     private Long itemId;
+    private Long auctionId;
 
     private Date createdAt;
     private boolean orderStatus;
