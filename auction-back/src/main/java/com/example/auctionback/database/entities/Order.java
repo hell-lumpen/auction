@@ -12,6 +12,7 @@ import java.util.Date;
 @Setter
 @Getter
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
@@ -27,4 +28,8 @@ public class Order {
 
     private Date createdAt;
     private boolean orderStatus; // true - текущий ордер или нет
+
+    public boolean getOrderStatus() {
+        return orderStatus;
+    }
 }

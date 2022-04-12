@@ -11,6 +11,7 @@ public class MoneyValue {
     private int integerPart;
     private int fractionalPart;
 
+
     public MoneyValue(String line) {
 
         int index = line.indexOf('.');
