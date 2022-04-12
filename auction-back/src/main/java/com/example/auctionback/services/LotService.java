@@ -108,7 +108,7 @@ public class LotService {
                 false
                 );
 
-        if (newOrder.getOrderPrice() <= currentOrder.getOrderPrice())
+        if (newOrder.getPrice() <= currentOrder.getPrice())
             throw NotEnoughtMoneyException;
         else
             newOrder.setOrderStatus(true);
@@ -116,10 +116,10 @@ public class LotService {
 
         if (currentOrder != null) {
             currentOrder.setOrderStatus(false);
-            this.unlockMoney(currentOrder.getOrderOwnerId(), currentOrder.getOrderPrice());
+            this.unlockMoney(currentOrder.getOwnerId(), currentOrder.getPrice());
         }
 
-        this.lockMoney(newOrder.getOrderOwnerId(), newOrder.getOrderPrice())
+        this.lockMoney(newOrder.getOwnerId(), newOrder.getPrice())
         orderRepository.save(currentOrder);
         orderRepository.save(newOrder);
         return newOrder;
@@ -175,8 +175,8 @@ public class LotService {
 
         if (currentOrder != null){
             Long userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerId(); //get owner id item
-            this.transferMoney(currentOrder.getOrderOwnerId(), userId, currentOrder.getOrderPrice());
-            this.transferItem(currentOrder.getOrderOwnerId(), lot.getItemId());
+            this.transferMoney(currentOrder.getOwnerId(), userId, currentOrder.getPrice());
+            this.transferItem(currentOrder.getOwnerId(), lot.getItemId());
         }
 
 

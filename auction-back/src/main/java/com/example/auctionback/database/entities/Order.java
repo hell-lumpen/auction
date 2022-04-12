@@ -18,10 +18,10 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    private Long id;
 
-    private Long orderOwnerId;
-    private String orderPrice;
+    private Long ownerId;
+    private String price;
     private Long itemId;
     private Long auctionId;
 
