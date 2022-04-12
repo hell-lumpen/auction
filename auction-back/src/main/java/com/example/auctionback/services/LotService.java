@@ -2,10 +2,7 @@ package com.example.auctionback.services;
 
 import com.example.auctionback.controllers.models.LotDTO;
 import com.example.auctionback.controllers.models.OrderDTO;
-import com.example.auctionback.database.entities.Lot;
-import com.example.auctionback.database.entities.Item;
-import com.example.auctionback.database.entities.Bidder;
-import com.example.auctionback.database.entities.Order;
+import com.example.auctionback.database.entities.*;
 import com.example.auctionback.database.repository.OrderRepository;
 import com.example.auctionback.exceptions.*;
 import com.example.auctionback.database.repository.LotRepository;
@@ -92,7 +89,7 @@ public class LotService {
         List<Order> allOrders = orderRepository.findByAuctionId(bidRequest.getAuctionId());
         Order currentOrder = null;
         for (var o : allOrders)
-            if (o.isOrderStatus())
+            if (o.getOrderStatus())
             {
                 currentOrder = o;
                 break;
@@ -108,21 +105,45 @@ public class LotService {
                 false
                 );
 
-        if (newOrder.getPrice() <= currentOrder.getPrice())
-            throw NotEnoughtMoneyException;
-        else
-            newOrder.setOrderStatus(true);
-
-
-        if (currentOrder != null) {
-            currentOrder.setOrderStatus(false);
-            this.unlockMoney(currentOrder.getOwnerId(), currentOrder.getPrice());
+        if (currentOrder == null) {
+            MoneyValue newMoney = new MoneyValue(newOrder.getOrderPrice());
+            this.lockMoney(newOrder.getOrderOwnerId(), newMoney);
+            orderRepository.save(newOrder);
+            return new OrderDTO(
+                    newOrder.getOrderId(),
+                    newOrder.getOrderOwnerId(),
+                    newOrder.getOrderPrice(),
+                    newOrder.getItemId(),
+                    newOrder.getAuctionId(),
+                    newOrder.getCreatedAt(),
+                    newOrder.getOrderStatus()
+            );
         }
 
-        this.lockMoney(newOrder.getOwnerId(), newOrder.getPrice())
+        MoneyValue newMoney = new MoneyValue(newOrder.getOrderPrice());
+        MoneyValue currentMoney = new MoneyValue(currentOrder.getOrderPrice());
+
+        if (newMoney.lessThen(currentMoney))
+            throw new NotEnoughtMoneyException();
+
+
+        newOrder.setOrderStatus(true);
+
+        currentOrder.setOrderStatus(false);
+        this.unlockMoney(currentOrder.getOrderOwnerId(), currentMoney);
+        this.lockMoney(newOrder.getOrderOwnerId(), newMoney);
         orderRepository.save(currentOrder);
         orderRepository.save(newOrder);
-        return newOrder;
+
+        return new OrderDTO(
+                newOrder.getOrderId(),
+                newOrder.getOrderOwnerId(),
+                newOrder.getOrderPrice(),
+                newOrder.getItemId(),
+                newOrder.getAuctionId(),
+                newOrder.getCreatedAt(),
+                newOrder.getOrderStatus()
+        );
     /*
         //todo: проверить на то что ставка проходит минимальный increase
         Lot lot = lotRepository.findById(bidRequest.getLotId()).
@@ -162,7 +183,7 @@ public class LotService {
         List<Order> allOrders = orderRepository.findByAuctionId(auctionId);
         Order currentOrder = null;
         for (var o : allOrders)
-            if (o.isOrderStatus())
+            if (o.getOrderStatus())
             {
                 currentOrder = o;
                 break;
@@ -172,52 +193,38 @@ public class LotService {
         lot.setFinishAt(new Date());
         lot.setLotStatus(true);
 
-
         if (currentOrder != null){
             Long userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerId(); //get owner id item
-            this.transferMoney(currentOrder.getOwnerId(), userId, currentOrder.getPrice());
-            this.transferItem(currentOrder.getOwnerId(), lot.getItemId());
+            this.transferMoney(currentOrder.getOrderOwnerId(), userId, currentOrder.getOrderPrice());
+            this.transferItem(currentOrder.getOrderOwnerId(), lot.getItemId());
         }
 
-
-
-
-
-
-        Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
-
-        if (lot.getBidOwnerId() != 0) {
-            Long id = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerId(); //get owner id item
-            this.transferMoney(lot.getBidOwnerId(), id, lot.getBidCost());
-            this.transferItem(lot.getBidOwnerId(), lot.getItemId());
-        }
-
-        lotRepository.deleteById(auctionId);
         return null;
     }
 
-    private void lockMoney(Long userId, Long money) throws BidderNotFoundException, NotEnoughtMoneyException {
-/*
-        Bidder bidder = bidderRepository.findById(bidRequest.getNewBidderId()).
-                orElseThrow(BidderNotFoundException::new);
-
-        if (bidder.getMoney() < bidRequest.getNextBid())
+    private void lockMoney(Long userId, MoneyValue money) throws BidderNotFoundException, NotEnoughtMoneyException {
+        Bidder bidder = bidderRepository.findById(userId).orElseThrow();//можно прокинуть ошибку
+        MoneyValue currentMoney = new MoneyValue(bidder.getMoney());
+        MoneyValue reversedMoney = new MoneyValue(bidder.getReservedMoney());
+        if (currentMoney.lessThen(money))
             throw new NotEnoughtMoneyException();
 
-        bidder.setReservedMoney(bidder.getReservedMoney() + bidRequest.getNextBid());
-        bidder.setMoney(bidder.getMoney() - bidder.getReservedMoney());
-        bidderRepository.save(bidder);*/
+        reversedMoney.Add(money);
+        currentMoney.Diff(money);
+        bidder.setMoney(currentMoney.toString());
+        bidder.setReservedMoney(reversedMoney.toString());
+        bidderRepository.save(bidder);
     }
 
-    private void unlockMoney(Long userId, Long money) throws BidderNotFoundException {
-
-        /*Lot lot = lotRepository.findById(bidRequest.getLotId()).orElseThrow();
-        Bidder bidder = bidderRepository.findById(lot.getBidOwnerId()).
-                orElseThrow(BidderNotFoundException::new);
-
-        bidder.setReservedMoney(bidder.getReservedMoney() - bidRequest.getNextBid());
-        bidder.setMoney(bidder.getMoney() + bidder.getReservedMoney());
-        bidderRepository.save(bidder);*/
+    private void unlockMoney(Long userId, MoneyValue money) throws BidderNotFoundException {
+        Bidder bidder = bidderRepository.findById(userId).orElseThrow();//можно прокинуть ошибку
+        MoneyValue currentMoney = new MoneyValue(bidder.getMoney());
+        MoneyValue reversedMoney = new MoneyValue(bidder.getReservedMoney());
+        reversedMoney.Diff(money);
+        currentMoney.Add(money);
+        bidder.setMoney(currentMoney.toString());
+        bidder.setReservedMoney(reversedMoney.toString());
+        bidderRepository.save(bidder);
     }
 
     private void transferMoney(Long sourceId, Long destinationId, float cost) {
