@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface LotRepository extends CrudRepository<Lot, Long>, PagingAndSortingRepository<Lot, Long> {
     Optional<Long> findByItemId(Long id);
-    Optional<Long> findByBidOwnerId(Long id);
+    Optional<Long> findByOwnerId(Long id);
     Boolean existsByItemId(Long id);
 }

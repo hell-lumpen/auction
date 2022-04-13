@@ -7,6 +7,7 @@ import com.example.auctionback.database.entities.Order;
 import com.example.auctionback.exceptions.*;
 import com.example.auctionback.services.LotService;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,16 +36,16 @@ public class LotController {
     }
 
     @PutMapping("/{id}/bid")
-    public LotDTO createNewBid(@PathVariable("id") Long auctionId, @RequestBody OrderDTO bidRequest)
+    public OrderDTO createNewBid(@PathVariable("id") Long auctionId, @RequestBody OrderDTO bidRequest)
             throws NotEnoughtMoneyException, BidderNotFoundException, LotNotFoundException {
         return lotService.updateAuction(bidRequest);
     }
 
-    @DeleteMapping("/{id}")
-    public String deleteAuction(@PathVariable("id") Long auctionId)
-            throws LotNotFoundException {
-        return lotService.deleteAuction(auctionId);
-    }
+//    @DeleteMapping("/{id}")
+//    public String deleteAuction(@PathVariable("id") Long auctionId)
+//            throws LotNotFoundException {
+//        return lotService.deleteAuction(auctionId);
+//    }
 
     @PutMapping("/{id}/finish")
     // todo: убрать мапинг. сделать ее приватной с запуском по таймеру

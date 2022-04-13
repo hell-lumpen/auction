@@ -195,7 +195,7 @@ public class LotService {
 
         if (currentOrder != null){
             Long userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerId(); //get owner id item
-            this.transferMoney(currentOrder.getOrderOwnerId(), userId, currentOrder.getOrderPrice());
+            this.transferMoney(currentOrder.getOrderOwnerId(), userId, new MoneyValue(currentOrder.getOrderPrice()));
             this.transferItem(currentOrder.getOrderOwnerId(), lot.getItemId());
         }
 
@@ -227,12 +227,12 @@ public class LotService {
         bidderRepository.save(bidder);
     }
 
-    private void transferMoney(Long sourceId, Long destinationId, float cost) {
+    private void transferMoney(Long sourceId, Long destinationId, MoneyValue cost) {
 
         Bidder bidder1 = bidderRepository.findById(sourceId).orElseThrow();
         Bidder bidder2 = bidderRepository.findById(destinationId).orElseThrow();
 
-        bidder1.setReservedMoney(bidder1.getReservedMoney() - cost);
+        bidder1.setReservedMoney(new MoneyValue(bidder1.getReservedMoney()).Diff(cost).toString());
         bidder2.setMoney(bidder2.getMoney() + cost);
         bidderRepository.save(bidder1);
         bidderRepository.save(bidder2);
