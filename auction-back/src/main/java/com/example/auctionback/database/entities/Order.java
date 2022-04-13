@@ -2,19 +2,16 @@ package com.example.auctionback.database.entities;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Setter
 @Getter
 @Builder
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "auction_order")
 public class Order {
 
     @Id
