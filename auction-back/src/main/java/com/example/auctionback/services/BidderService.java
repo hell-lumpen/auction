@@ -24,7 +24,7 @@ public class BidderService {
     private final ItemRepository itemRepository;
 
     public BidderDTO saveBidder(BidderDTO bidderDTO) {
-        //todo: добавить nickname
+        //todo: сделать разные никнеймы
         Bidder bidder = Bidder.builder()
                 .name(bidderDTO.getName())
                 .money(bidderDTO.getMoney())

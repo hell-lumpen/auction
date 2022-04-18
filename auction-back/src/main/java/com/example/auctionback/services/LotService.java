@@ -199,7 +199,7 @@ public class LotService {
             this.transferItem(currentOrder.getOrderOwnerId(), lot.getItemId());
         }
 
-
+        lotRepository.save(lot);
         return null;
     }
 

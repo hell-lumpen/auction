@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping("/orders")
-    public OrderDTO createNewOrder(@RequestBody OrderDTO orderRequest) {
-        return orderService.createNewOrder(orderRequest);
-    }
+//    @PostMapping("/orders")
+//    public OrderDTO createNewOrder(@RequestBody OrderDTO orderRequest) {
+//        return orderService.createNewOrder(orderRequest);
+//    }
 
     @GetMapping("/orders/{id}")
     public OrderDTO getOrder(@PathVariable("id") Long orderId) {

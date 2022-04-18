@@ -17,7 +17,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/clients")
+@RequestMapping("/client")
 @AllArgsConstructor
 public class BidderController {
     private final BidderService bidderService;

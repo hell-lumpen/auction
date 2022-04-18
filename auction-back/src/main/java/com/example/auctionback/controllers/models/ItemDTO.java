@@ -14,4 +14,9 @@ public class ItemDTO {
     private String description;
 
     private long ownerId;
+
+    String ge(String m){
+        String name = "a";
+        return "my full name is " + name + " oh yeah";
+    }
 }

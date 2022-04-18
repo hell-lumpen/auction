@@ -14,18 +14,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/auction")
 @AllArgsConstructor
 public class LotController {
     private final LotService lotService;
 
-    @PostMapping("/auction")
+    @PostMapping("")
     public LotDTO createAuction(@RequestBody LotDTO auctionRequest)
             throws LotAlreadyExistException, ItemNotFoundException {
         return lotService.createNewLot(auctionRequest);
     }
 
-    @GetMapping("/auction/{id}")
+    @GetMapping("/{id}")
     public LotDTO getAuction(@PathVariable("id") Long auctionId) throws LotNotFoundException {
         return lotService.getLot(auctionId);
     }
