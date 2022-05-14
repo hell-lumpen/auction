@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 @RestController
-@RequestMapping("/registration")
+@RequestMapping("/api/public/registration")
 public class RegistrationController {
 
     private final RegistrationService registrationService;

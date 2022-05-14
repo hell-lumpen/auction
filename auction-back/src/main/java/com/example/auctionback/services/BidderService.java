@@ -5,16 +5,19 @@ import com.example.auctionback.controllers.models.ItemDTO;
 import com.example.auctionback.database.entities.Bidder;
 import com.example.auctionback.database.entities.Item;
 import com.example.auctionback.exceptions.BidderNotFoundException;
+import com.example.auctionback.exceptions.DataNotCorrectException;
 import com.example.auctionback.exceptions.ItemAlreadyExistException;
 import com.example.auctionback.exceptions.ItemNotFoundException;
+import com.example.auctionback.security.models.OurAuthToken;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface BidderService {
-    
-    public BidderDTO getBidder(String bidderNickname) throws BidderNotFoundException;
+
+    public BidderDTO getBidder(String bidderNickname, OurAuthToken token)
+            throws BidderNotFoundException, DataNotCorrectException;
 
     public List<BidderDTO> getAllBidders();
 

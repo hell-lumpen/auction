@@ -24,7 +24,7 @@ public class Lot {
     private Long lastOrderId;
     private String minBidIncrease;
 
-    private Long ownerId;
+    private String ownerNickname;
 
     private boolean lotStatus = false;
 

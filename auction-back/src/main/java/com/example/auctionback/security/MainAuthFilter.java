@@ -81,7 +81,7 @@ public class MainAuthFilter implements Filter {
 
         Bidder bidder = optionalBidder.get();
 
-        if (passwordEncoder.matches(password+"sada", bidder.getPassword())){
+        if (!passwordEncoder.matches(password+"sada", bidder.getPassword())){
             return null;
         }
 

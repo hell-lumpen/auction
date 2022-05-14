@@ -4,12 +4,15 @@ import com.example.auctionback.controllers.models.ItemDTO;
 import com.example.auctionback.controllers.models.BidderDTO;
 import com.example.auctionback.database.entities.Item;
 import com.example.auctionback.database.entities.Bidder;
+import com.example.auctionback.exceptions.DataNotCorrectException;
 import com.example.auctionback.exceptions.ItemAlreadyExistException;
 import com.example.auctionback.exceptions.ItemNotFoundException;
 import com.example.auctionback.exceptions.BidderNotFoundException;
 import com.example.auctionback.database.repository.ItemRepository;
 import com.example.auctionback.database.repository.BidderRepository;
+import com.example.auctionback.security.models.OurAuthToken;
 import com.example.auctionback.services.BidderService;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,11 +29,22 @@ public class BidderServiceImpl implements BidderService {
     private final ItemRepository itemRepository;
 
 
-    public BidderDTO getBidder(String bidderNickname) throws BidderNotFoundException {
+    public BidderDTO getBidder(String bidderNickname, OurAuthToken token)
+            throws BidderNotFoundException, DataNotCorrectException {
 
         Optional<Bidder> existedBidder = bidderRepository.findOptionalByNickname(bidderNickname);
         Bidder bidder = existedBidder.orElseThrow(BidderNotFoundException::new); // по идее нахер не нужно ибо такая ошибка тут невозможна
-        return mapper.map(bidder, BidderDTO.class);
+        if (bidder.getNickname() != token.getPrincipal().getNickname())
+            throw new DataNotCorrectException();
+
+        return BidderDTO.builder()
+                .id(bidder.getId())
+                .name(bidder.getName())
+                .money(bidder.getMoney())
+                .reservedMoney(bidder.getReservedMoney())
+                .nickname(bidder.getNickname())
+                .password(bidder.getPassword())
+                .build();
     }
 
     public List<BidderDTO> getAllBidders() {
@@ -42,6 +56,7 @@ public class BidderServiceImpl implements BidderService {
                         .name(bidder.getName())
                         .money(bidder.getMoney())
                         .reservedMoney(bidder.getReservedMoney())
+                        .nickname(bidder.getNickname())
                         .password(bidder.getPassword())
                         .build()
                 ).collect(Collectors.toList());

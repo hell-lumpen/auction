@@ -26,15 +26,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().disable()
                 .authorizeHttpRequests()
-                    .antMatchers("/auction/all").permitAll()
-                    .antMatchers("/auction/{id}").permitAll()
-                    .antMatchers("/registration/signup").permitAll()
-                    .antMatchers("/registration/signin").permitAll()
-                .anyRequest().authenticated()
+                    .antMatchers("/api/public/**").permitAll()
+                    .anyRequest().authenticated()
                 .and()
                     .addFilterAfter(
                             mainAuthFilter.setRequireAuthMatcher(
-                                    new AndRequestMatcher(new AntPathRequestMatcher("/**"))
+                                    new AndRequestMatcher(new AntPathRequestMatcher("/api/private/**"))
                             ), UsernamePasswordAuthenticationFilter.class
                     );
 

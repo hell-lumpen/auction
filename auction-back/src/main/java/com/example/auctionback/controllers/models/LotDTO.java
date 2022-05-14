@@ -16,6 +16,6 @@ public class LotDTO {
     private String currentCost;
     private String minBidIncrease;
 
-    private Long ownerId;
+    private String ownerNickname;
 
 }

@@ -66,10 +66,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public ResponseEntity<String> signin(LoggingParams params) throws BidderNotFoundException, DataNotCorrectException {
-        System.out.println(params.getNickname());
-
-        System.out.println(params.getPassword());
-
         Bidder existedBidder = bidderRepository.findOptionalByNickname(params.getNickname())
                 .orElseThrow(BidderNotFoundException::new);
         String passwordHash = passwordEncoder.encode(params.getPassword() + "sada");

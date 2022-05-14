@@ -5,6 +5,7 @@ import com.example.auctionback.controllers.models.LotDTO;
 import com.example.auctionback.database.entities.Lot;
 import com.example.auctionback.database.entities.Order;
 import com.example.auctionback.exceptions.*;
+import com.example.auctionback.security.models.OurAuthToken;
 import com.example.auctionback.services.LotService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -14,28 +15,34 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auction")
+@RequestMapping("/api/")
 @AllArgsConstructor
 public class LotController {
     private final LotService lotService;
 
-    @PostMapping("")
-    public LotDTO createAuction(@RequestBody LotDTO auctionRequest)
-            throws LotAlreadyExistException, ItemNotFoundException {
-        return lotService.createNewLot(auctionRequest);
+    @PostMapping("/private/auction")
+    public LotDTO createAuction(@RequestBody LotDTO auctionRequest, OurAuthToken token)
+            throws LotAlreadyExistException, ItemNotFoundException,
+            DataNotCorrectException{
+        return lotService.createNewLot(auctionRequest, token);
     }
 
-    @GetMapping("/{id}")
-    public LotDTO getAuction(@PathVariable("id") Long auctionId) throws LotNotFoundException {
+    @GetMapping("/private/auction/{id}")
+    public LotDTO getAuction(@PathVariable("id") Long auctionId, OurAuthToken token) throws LotNotFoundException {
         return lotService.getLot(auctionId);
     }
+// todo: у всех гетов не заполняется ownerId
+    @GetMapping("/private/auction/{id}/orders")
+    public List<OrderDTO> getAllOrder(@PathVariable("id") Long auctionId) throws LotNotFoundException {
+        return lotService.getAllOrders(auctionId);
+    }
 
-    @GetMapping("/all")
+    @GetMapping("/public/auction/all")
     public List<LotDTO> getAllAuctions() {
         return lotService.getAllLots();
     }
 
-    @PutMapping("/{id}/bid")
+    @PutMapping("/private/auction/{id}/bid")
     public OrderDTO createNewBid(@PathVariable("id") Long auctionId, @RequestBody OrderDTO bidRequest)
             throws NotEnoughtMoneyException, BidderNotFoundException, LotNotFoundException {
         return lotService.updateAuction(bidRequest);
@@ -47,19 +54,12 @@ public class LotController {
 //        return lotService.deleteAuction(auctionId);
 //    }
 
-    @PutMapping("/{id}/finish")
+    @PutMapping("/private/auction/{id}/finish")
     // todo: убрать мапинг. сделать ее приватной с запуском по таймеру
     public String finishAuction(@PathVariable("id") Long auctionId)
             throws LotNotFoundException {
         return lotService.finishAuction(auctionId);
     }
 
-    private LotDTO convertToDTO(Lot lot) {
-        return new ModelMapper().map(lot, LotDTO.class);
-    }
-
-    private Lot convertToEntity(LotDTO lotDTO) {
-        return new ModelMapper().map(lotDTO, Lot.class);
-    }
 
 }

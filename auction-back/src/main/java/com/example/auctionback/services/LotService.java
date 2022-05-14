@@ -5,6 +5,7 @@ import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.*;
 import com.example.auctionback.database.repository.OrderRepository;
 import com.example.auctionback.exceptions.*;
+import com.example.auctionback.security.models.OurAuthToken;
 import org.modelmapper.ModelMapper;
 import com.example.auctionback.database.repository.LotRepository;
 import com.example.auctionback.database.repository.ItemRepository;
@@ -26,8 +27,9 @@ public class LotService {
     private final OrderRepository orderRepository;
     private final ModelMapper mapper;
 
-    public LotDTO createNewLot(LotDTO lotDTO)
-            throws LotAlreadyExistException, ItemNotFoundException {
+    public LotDTO createNewLot(LotDTO lotDTO, OurAuthToken token)
+            throws LotAlreadyExistException, ItemNotFoundException,
+            DataNotCorrectException{
 
         if (!itemRepository.existsById(lotDTO.getItemId()))
             throw new ItemNotFoundException();
@@ -35,6 +37,10 @@ public class LotService {
         if (lotRepository.existsByItemId(lotDTO.getItemId()))
             throw new LotAlreadyExistException();
 
+        if (lotDTO.getTitle() == null)
+            throw new DataNotCorrectException();
+
+        lotDTO.setOwnerNickname(token.getPrincipal().getNickname());
         Lot lot = mapper.map(lotDTO, Lot.class);
 
         lotRepository.save(lot);
@@ -58,7 +64,7 @@ public class LotService {
                         .description(lot.getDescription())
                         .itemId(lot.getItemId())
                         .minBidIncrease(lot.getMinBidIncrease())
-                        .ownerId(lot.getOwnerId())
+                        .ownerNickname(lot.getOwnerNickname())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -192,4 +198,20 @@ public class LotService {
         itemRepository.save(item);
     }
 
+    public List<OrderDTO> getAllOrders(Long auctionId) throws LotNotFoundException {
+        lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
+        var orders =  orderRepository.findByAuctionId(auctionId);
+
+        return orders.stream()
+                .map(order -> OrderDTO.builder()
+                        .orderId(order.getOrderId())
+                        .orderOwnerNickname(order.getOrderOwnerNickname())
+                        .orderPrice(order.getOrderPrice())
+                        .itemId(order.getItemId())
+                        .auctionId(order.getAuctionId())
+                        .createdAt(order.getCreatedAt())
+                        .orderStatus(order.getOrderStatus())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

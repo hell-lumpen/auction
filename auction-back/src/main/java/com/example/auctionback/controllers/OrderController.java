@@ -2,12 +2,13 @@ package com.example.auctionback.controllers;
 
 import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.Order;
+import com.example.auctionback.services.OrderService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/api/private")
 @AllArgsConstructor
 public class OrderController {
     private final OrderService orderService;

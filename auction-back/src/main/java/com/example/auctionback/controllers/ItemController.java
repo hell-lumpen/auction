@@ -5,6 +5,7 @@ import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.Item;
 import com.example.auctionback.database.entities.Order;
 import com.example.auctionback.exceptions.ItemNotFoundException;
+import com.example.auctionback.security.models.OurAuthToken;
 import com.example.auctionback.services.ItemService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -13,25 +14,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/item")
+@RequestMapping("/api/private/item")
 @AllArgsConstructor
 public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{id}")
     public ItemDTO getItem(@PathVariable("id") Long itemId) throws ItemNotFoundException {
-        //todo: get all items
         return itemService.getItem(itemId);
     }
 
     @GetMapping("/all")
-    public List<ItemDTO> getItems()  {
-        return itemService.getAllItem();
+    public List<ItemDTO> getItems(OurAuthToken token)  {
+        return itemService.getAllItem(token);
     }
 
     @PostMapping("")
-    public ItemDTO saveNewItem(@RequestBody ItemDTO itemRequest) {
-        return itemService.saveItem(itemRequest);
+    public ItemDTO saveNewItem(@RequestBody ItemDTO itemRequest, OurAuthToken token) {
+//        todo: взять из хедера никнейм и добавить его в ItemDTO
+        return itemService.saveItem(itemRequest, token);
     }
 
     @DeleteMapping()

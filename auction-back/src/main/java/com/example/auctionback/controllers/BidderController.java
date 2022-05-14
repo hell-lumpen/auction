@@ -3,9 +3,11 @@ package com.example.auctionback.controllers;
 import com.example.auctionback.controllers.models.ItemDTO;
 import com.example.auctionback.controllers.models.BidderDTO;
 import com.example.auctionback.database.entities.Bidder;
+import com.example.auctionback.exceptions.DataNotCorrectException;
 import com.example.auctionback.exceptions.ItemAlreadyExistException;
 import com.example.auctionback.exceptions.ItemNotFoundException;
 import com.example.auctionback.exceptions.BidderNotFoundException;
+import com.example.auctionback.security.models.OurAuthToken;
 import com.example.auctionback.services.BidderService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -15,16 +17,16 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/client")
+@RequestMapping("/api/private/client")
 @AllArgsConstructor
 public class BidderController {
     private final BidderService bidderService;
 
     @GetMapping("/{nickname}")
-    public BidderDTO getBidder(@PathVariable("nickname") String clientNickname)
-            throws BidderNotFoundException {
+    public BidderDTO getBidder(@PathVariable("nickname") String clientNickname, OurAuthToken token)
+            throws BidderNotFoundException, DataNotCorrectException {
         //todo: get all items
-        return bidderService.getBidder(clientNickname);
+        return bidderService.getBidder(clientNickname, token);
     }
 
     @GetMapping("/all")
