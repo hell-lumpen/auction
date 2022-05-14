@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends CrudRepository<Item, Long> {
-    Optional<List<Item>> findByOwnerId(Long slaveId);
+    Optional<List<Item>> findByOwnerNickname(String bidderNickname);
 }

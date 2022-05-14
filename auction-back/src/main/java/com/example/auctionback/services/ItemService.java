@@ -5,6 +5,7 @@ import com.example.auctionback.exceptions.ItemNotFoundException;
 import com.example.auctionback.database.repository.ItemRepository;
 import com.example.auctionback.controllers.models.ItemDTO;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,36 +15,20 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class ItemService {
+    private final ModelMapper mapper;
     private final ItemRepository itemRepository;
 
     public ItemDTO getItem(Long itemId) throws ItemNotFoundException {
 
         Optional<Item> existedItem = itemRepository.findById(itemId);
-        Item item = existedItem.orElseThrow(ItemNotFoundException::new); // по идее нахер не нужно ибо такая ошибка тут невозможна
-
-        return ItemDTO.builder()
-                .id(itemId)
-                .name(item.getName())
-                .description(item.getDescription())
-                .ownerId(item.getOwnerId())
-                .build();
+        Item item = existedItem.orElseThrow(ItemNotFoundException::new);
+        return mapper.map(item, ItemDTO.class);
     }
 
     public ItemDTO saveItem(ItemDTO itemDTO) {
-        Item item = Item.builder()
-                .name(itemDTO.getName())
-                .description(itemDTO.getDescription())
-                .ownerId(itemDTO.getOwnerId())
-                .build();
-
+        Item item = mapper.map(itemDTO, Item.class);
         itemRepository.save(item);
-        //todo: сделать из item в itemDTO
-        return ItemDTO.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .ownerId(item.getOwnerId())
-                .build();
+        return itemDTO;
     }
 
     public List<ItemDTO> getAllItem() {
@@ -54,7 +39,7 @@ public class ItemService {
                         .id(item.getId())
                         .name(item.getName())
                         .description(item.getDescription())
-                        .ownerId(item.getOwnerId())
+                        .ownerNickname(item.getOwnerNickname())
                         .build())
                 .collect(Collectors.toList());
     }

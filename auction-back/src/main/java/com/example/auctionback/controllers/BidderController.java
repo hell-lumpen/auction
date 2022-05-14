@@ -2,9 +2,7 @@ package com.example.auctionback.controllers;
 
 import com.example.auctionback.controllers.models.ItemDTO;
 import com.example.auctionback.controllers.models.BidderDTO;
-import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.Bidder;
-import com.example.auctionback.database.entities.Order;
 import com.example.auctionback.exceptions.ItemAlreadyExistException;
 import com.example.auctionback.exceptions.ItemNotFoundException;
 import com.example.auctionback.exceptions.BidderNotFoundException;
@@ -21,29 +19,18 @@ import java.util.List;
 @AllArgsConstructor
 public class BidderController {
     private final BidderService bidderService;
-//    private final ItemService itemService;
 
-    @GetMapping("/{id}")
-    public BidderDTO getBidder(@PathVariable("id") Long slaveId) throws BidderNotFoundException {
+    @GetMapping("/{nickname}")
+    public BidderDTO getBidder(@PathVariable("nickname") String clientNickname)
+            throws BidderNotFoundException {
         //todo: get all items
-        return bidderService.getBidder(slaveId);
+        return bidderService.getBidder(clientNickname);
     }
 
     @GetMapping("/all")
-    // пока не нужен, но пусть будет для админки например)
+    // пока не нужен, но пусть будет
     public List<BidderDTO> getBidders()  {
         return bidderService.getAllBidders();
-    }
-
-    @PostMapping("/signin")
-    public BidderDTO bidderSignIn(@RequestBody BidderDTO bidderDTO) {
-        return bidderService.saveBidder(bidderDTO);
-    }
-
-    @PostMapping("/login")
-    public BidderDTO bidderLogIn(@RequestBody BidderDTO bidderDTO) {
-//        todo: реализовать logIn
-        return null;
     }
 
     @PostMapping("/logout")
@@ -52,22 +39,25 @@ public class BidderController {
         return null;
     }
 
-    @PostMapping("/{id}/items")
-    public ItemDTO addItem(@PathVariable("id") Long bidderId, @RequestBody ItemDTO itemRequest)
+    @PostMapping("/{nickname}/items")
+    public ItemDTO addItem(@PathVariable("nickname") String bidderNickname, @RequestBody ItemDTO itemRequest)
             throws ItemAlreadyExistException, BidderNotFoundException {
-        return bidderService.addItem(bidderId, itemRequest);
+
+        return bidderService.addItem(bidderNickname, itemRequest);
     }
-    @GetMapping("/{id}/items")
-    public List<ItemDTO> getAllItems(@PathVariable("id") Long bidderId)
+
+    @GetMapping("/{nickname}/items")
+    public List<ItemDTO> getAllItems(@PathVariable("nickname") String bidderNickname)
             throws ItemNotFoundException, BidderNotFoundException {
-        return bidderService.getAllBidderItems(bidderId);
+
+        return bidderService.getAllBidderItems(bidderNickname);
     }
 
     @DeleteMapping("/{id}")
-    public BidderDTO deleteBidder(@PathVariable("id") Long bidderId)
+    public BidderDTO deleteBidder(@PathVariable("id") String bidderNickname)
             throws BidderNotFoundException {
         //todo: delete items this user
-        return bidderService.deleteBidder(bidderId);
+        return bidderService.deleteBidder(bidderNickname);
     }
 
     private BidderDTO convertToDTO(Bidder bidder) {

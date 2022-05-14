@@ -29,5 +29,5 @@ public class Lot {
     private boolean lotStatus = false;
 
     private Date createAt;
-    private Date finishAt = null;
+    private Date finishAt;
 }

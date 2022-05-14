@@ -18,5 +18,5 @@ public class Item {
 
     private String name;
     private String description;
-    private Long ownerId;
+    private String ownerNickname;
 }

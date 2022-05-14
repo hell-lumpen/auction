@@ -5,6 +5,7 @@ import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.*;
 import com.example.auctionback.database.repository.OrderRepository;
 import com.example.auctionback.exceptions.*;
+import org.modelmapper.ModelMapper;
 import com.example.auctionback.database.repository.LotRepository;
 import com.example.auctionback.database.repository.ItemRepository;
 import com.example.auctionback.database.repository.BidderRepository;
@@ -23,7 +24,7 @@ public class LotService {
     private final ItemRepository itemRepository;
     private final BidderRepository bidderRepository;
     private final OrderRepository orderRepository;
-
+    private final ModelMapper mapper;
 
     public LotDTO createNewLot(LotDTO lotDTO)
             throws LotAlreadyExistException, ItemNotFoundException {
@@ -34,38 +35,17 @@ public class LotService {
         if (lotRepository.existsByItemId(lotDTO.getItemId()))
             throw new LotAlreadyExistException();
 
-        Lot lot = Lot.builder()
-                .id(lotDTO.getId())
-                .title(lotDTO.getTitle())
-                .description(lotDTO.getDescription())
-                .itemId(lotDTO.getItemId())
-                .minBidIncrease(lotDTO.getMinBidIncrease())
-                .ownerId(lotDTO.getOwnerId())
-                .build();
+        Lot lot = mapper.map(lotDTO, Lot.class);
 
         lotRepository.save(lot);
         // todo: mapper https://www.baeldung.com/entity-to-and-from-dto-for-a-java-spring-application
-        return LotDTO.builder()
-                .id(lotDTO.getId())
-                .title(lotDTO.getTitle())
-                .description(lotDTO.getDescription())
-                .itemId(lotDTO.getItemId())
-                .minBidIncrease(lotDTO.getMinBidIncrease())
-                .ownerId(lotDTO.getOwnerId())
-                .build();
+        return lotDTO;
 
     }
 
     public LotDTO getLot(Long lotId) throws LotNotFoundException {
         Lot lot = lotRepository.findById(lotId).orElseThrow(LotNotFoundException::new);
-
-        return LotDTO.builder()
-                .id(lot.getId())
-                .title(lot.getTitle())
-                .description(lot.getDescription())
-                .itemId(lot.getItemId())
-                .minBidIncrease(lot.getMinBidIncrease())
-                .build();
+        return mapper.map(lot, LotDTO.class);
     }
 
     public List<LotDTO> getAllLots() {
@@ -95,29 +75,15 @@ public class LotService {
                 break;
             }
 
-        Order newOrder = new Order(
-                bidRequest.getOrderId(),
-                bidRequest.getOrderOwnerId(),
-                bidRequest.getOrderPrice(),
-                bidRequest.getItemId(),
-                bidRequest.getAuctionId(),
-                new Date(),
-                false
-                );
+        Order newOrder = mapper.map(bidRequest, Order.class);
+        newOrder.setCreatedAt(new Date());
+        newOrder.setOrderStatus(false);
 
-        if (currentOrder == null) {
+         if (currentOrder == null) {
             MoneyValue newMoney = new MoneyValue(newOrder.getOrderPrice());
-            this.lockMoney(newOrder.getOrderOwnerId(), newMoney);
+            this.lockMoney(newOrder.getOrderOwnerNickname(), newMoney);
             orderRepository.save(newOrder);
-            return new OrderDTO(
-                    newOrder.getOrderId(),
-                    newOrder.getOrderOwnerId(),
-                    newOrder.getOrderPrice(),
-                    newOrder.getItemId(),
-                    newOrder.getAuctionId(),
-                    newOrder.getCreatedAt(),
-                    newOrder.getOrderStatus()
-            );
+            return mapper.map(newOrder, OrderDTO.class);
         }
 
         MoneyValue newMoney = new MoneyValue(newOrder.getOrderPrice());
@@ -130,20 +96,13 @@ public class LotService {
         newOrder.setOrderStatus(true);
 
         currentOrder.setOrderStatus(false);
-        this.unlockMoney(currentOrder.getOrderOwnerId(), currentMoney);
-        this.lockMoney(newOrder.getOrderOwnerId(), newMoney);
+        this.unlockMoney(currentOrder.getOrderOwnerNickname(), currentMoney);
+        this.lockMoney(newOrder.getOrderOwnerNickname(), newMoney);
         orderRepository.save(currentOrder);
         orderRepository.save(newOrder);
 
-        return new OrderDTO(
-                newOrder.getOrderId(),
-                newOrder.getOrderOwnerId(),
-                newOrder.getOrderPrice(),
-                newOrder.getItemId(),
-                newOrder.getAuctionId(),
-                newOrder.getCreatedAt(),
-                newOrder.getOrderStatus()
-        );
+
+        return mapper.map(newOrder, OrderDTO.class);
     /*
         //todo: проверить на то что ставка проходит минимальный increase
         Lot lot = lotRepository.findById(bidRequest.getLotId()).
@@ -162,19 +121,7 @@ public class LotService {
 
     }
 
-/*    public String deleteAuction(Long auctionId)
-            throws LotNotFoundException {
 
-        Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
-        if (lot.getBidOwnerId() != 0){
-            Bidder bidder = bidderRepository.findById(lot.getBidOwnerId()).orElseThrow();
-            bidder.setReservedMoney(bidder.getReservedMoney() - lot.getBidCost());
-        }
-
-        lotRepository.deleteById(auctionId);
-        return null;
-    }
-*/
     public String finishAuction(Long auctionId)
             throws LotNotFoundException {
 
@@ -182,29 +129,29 @@ public class LotService {
 
         List<Order> allOrders = orderRepository.findByAuctionId(auctionId);
         Order currentOrder = null;
-        for (var o : allOrders)
-            if (o.getOrderStatus())
-            {
-                currentOrder = o;
+        for (var order : allOrders) {
+            if (order.getOrderStatus()) {
+                currentOrder = order;
                 break;
             }
-
+        }
 
         lot.setFinishAt(new Date());
-        lot.setLotStatus(true);
+        lot.setLotStatus(true); // its can sell
 
         if (currentOrder != null){
-            Long userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerId(); //get owner id item
-            this.transferMoney(currentOrder.getOrderOwnerId(), userId, new MoneyValue(currentOrder.getOrderPrice()));
-            this.transferItem(currentOrder.getOrderOwnerId(), lot.getItemId());
+            String userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerNickname(); // get owner id item
+            this.transferMoney(currentOrder.getOrderOwnerNickname(), userId,
+                    new MoneyValue(currentOrder.getOrderPrice()));
+            this.transferItem(currentOrder.getOrderOwnerNickname(), lot.getItemId());
         }
 
         lotRepository.save(lot);
         return null;
     }
 
-    private void lockMoney(Long userId, MoneyValue money) throws BidderNotFoundException, NotEnoughtMoneyException {
-        Bidder bidder = bidderRepository.findById(userId).orElseThrow();//можно прокинуть ошибку
+    private void lockMoney(String bidderNickname, MoneyValue money) throws BidderNotFoundException, NotEnoughtMoneyException {
+        Bidder bidder = bidderRepository.findOptionalByNickname(bidderNickname).orElseThrow();//можно прокинуть ошибку
         MoneyValue currentMoney = new MoneyValue(bidder.getMoney());
         MoneyValue reversedMoney = new MoneyValue(bidder.getReservedMoney());
         if (currentMoney.lessThen(money))
@@ -217,8 +164,8 @@ public class LotService {
         bidderRepository.save(bidder);
     }
 
-    private void unlockMoney(Long userId, MoneyValue money) throws BidderNotFoundException {
-        Bidder bidder = bidderRepository.findById(userId).orElseThrow();//можно прокинуть ошибку
+    private void unlockMoney(String bidderNickname, MoneyValue money) throws BidderNotFoundException {
+        Bidder bidder = bidderRepository.findOptionalByNickname(bidderNickname).orElseThrow();//можно прокинуть ошибку
         MoneyValue currentMoney = new MoneyValue(bidder.getMoney());
         MoneyValue reversedMoney = new MoneyValue(bidder.getReservedMoney());
         reversedMoney.Diff(money);
@@ -228,10 +175,9 @@ public class LotService {
         bidderRepository.save(bidder);
     }
 
-    private void transferMoney(Long sourceId, Long destinationId, MoneyValue cost) {
-
-        Bidder bidder1 = bidderRepository.findById(sourceId).orElseThrow();
-        Bidder bidder2 = bidderRepository.findById(destinationId).orElseThrow();
+    private void transferMoney(String sourceNickname, String destinationNickname, MoneyValue cost) {
+        Bidder bidder1 = bidderRepository.findOptionalByNickname(sourceNickname).orElseThrow();
+        Bidder bidder2 = bidderRepository.findOptionalByNickname(destinationNickname).orElseThrow();
 
         bidder1.setReservedMoney(new MoneyValue(bidder1.getReservedMoney()).Diff(cost).toString());
         bidder2.setMoney(bidder2.getMoney() + cost);
@@ -240,9 +186,9 @@ public class LotService {
 
     }
 
-    private void transferItem(Long destinationId, Long itemId){
+    private void transferItem(String destinationNickname, Long itemId){
         Item item = itemRepository.findById(itemId).orElseThrow();
-        item.setOwnerId(destinationId);
+        item.setOwnerNickname(destinationNickname);
         itemRepository.save(item);
     }
 
