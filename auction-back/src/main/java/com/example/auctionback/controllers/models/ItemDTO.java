@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ItemDTO {
-    private long id;
+    private Long id;
 
     private String name;
     private String description;

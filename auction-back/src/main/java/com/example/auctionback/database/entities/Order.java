@@ -3,6 +3,7 @@ package com.example.auctionback.database.entities;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -23,7 +24,7 @@ public class Order {
     private Long itemId;
     private Long auctionId;
 
-    private Date createdAt;
+    private LocalDateTime createdAt;
     private boolean orderStatus; // true - текущий ордер или нет
 
     public boolean getOrderStatus() {

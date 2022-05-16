@@ -4,6 +4,8 @@ import lombok.*;
 import org.springframework.core.io.ResourceLoader;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -22,12 +24,13 @@ public class Lot {
 
     private Long itemId;
     private Long lastOrderId;
+    private String startCost;
     private String minBidIncrease;
 
     private String ownerNickname;
 
     private boolean lotStatus = false;
 
-    private Date createAt;
-    private Date finishAt;
+    private LocalDateTime createAt;
+    private LocalDateTime finishAt;
 }

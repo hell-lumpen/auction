@@ -4,6 +4,7 @@ import com.example.auctionback.controllers.models.ItemDTO;
 import com.example.auctionback.controllers.models.OrderDTO;
 import com.example.auctionback.database.entities.Item;
 import com.example.auctionback.database.entities.Order;
+import com.example.auctionback.exceptions.DataNotCorrectException;
 import com.example.auctionback.exceptions.ItemNotFoundException;
 import com.example.auctionback.security.models.OurAuthToken;
 import com.example.auctionback.services.ItemService;
@@ -20,8 +21,8 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{id}")
-    public ItemDTO getItem(@PathVariable("id") Long itemId) throws ItemNotFoundException {
-        return itemService.getItem(itemId);
+    public ItemDTO getItem(@PathVariable("id") Long itemId, OurAuthToken token) throws ItemNotFoundException, DataNotCorrectException {
+        return itemService.getItem(itemId, token);
     }
 
     @GetMapping("/all")

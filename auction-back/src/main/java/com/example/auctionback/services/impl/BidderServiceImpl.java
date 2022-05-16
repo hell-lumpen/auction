@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,9 +35,9 @@ public class BidderServiceImpl implements BidderService {
 
         Optional<Bidder> existedBidder = bidderRepository.findOptionalByNickname(bidderNickname);
         Bidder bidder = existedBidder.orElseThrow(BidderNotFoundException::new); // по идее нахер не нужно ибо такая ошибка тут невозможна
-        if (bidder.getNickname() != token.getPrincipal().getNickname())
+        if (!Objects.equals(bidder.getNickname(), token.getPrincipal().getNickname())) {
             throw new DataNotCorrectException();
-
+        }
         return BidderDTO.builder()
                 .id(bidder.getId())
                 .name(bidder.getName())
