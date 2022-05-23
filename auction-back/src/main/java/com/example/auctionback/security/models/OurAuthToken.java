@@ -13,13 +13,13 @@ import java.util.Collection;
 public class OurAuthToken extends AbstractAuthenticationToken {
 
     private Bidder principal;
-    private Long bidderId;
+    private String bidderNickname;
 
 
-    public OurAuthToken(Long bidderId, Bidder principal, Collection<? extends GrantedAuthority> authorities) {
+    public OurAuthToken(String bidderNickname, Bidder principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
-        this.bidderId = bidderId;
+        this.bidderNickname = bidderNickname;
         super.setAuthenticated(true);
     }
 

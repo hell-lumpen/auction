@@ -39,7 +39,6 @@ public class BidderServiceImpl implements BidderService {
             throw new DataNotCorrectException();
         }
         return BidderDTO.builder()
-                .id(bidder.getId())
                 .name(bidder.getName())
                 .money(bidder.getMoney())
                 .reservedMoney(bidder.getReservedMoney())
@@ -53,7 +52,6 @@ public class BidderServiceImpl implements BidderService {
 
         return  allBidders.stream()
                 .map(bidder -> BidderDTO.builder()
-                        .id(bidder.getId())
                         .name(bidder.getName())
                         .money(bidder.getMoney())
                         .reservedMoney(bidder.getReservedMoney())
@@ -66,16 +64,17 @@ public class BidderServiceImpl implements BidderService {
     public List<ItemDTO> getAllBidderItems(String bidderNickname)
             throws ItemNotFoundException, BidderNotFoundException {
 
-        bidderRepository.findOptionalByNickname(bidderNickname).orElseThrow(BidderNotFoundException::new);
+        Bidder bidder = bidderRepository.findOptionalByNickname(bidderNickname).orElseThrow(BidderNotFoundException::new);
 
-        Optional<List<Item>> items = itemRepository.findByOwnerNickname(bidderNickname);
-        List<Item> allBidderItems = items.orElseThrow(ItemNotFoundException::new);
+//        Optional<List<Item>> items = itemRepository.findByOwnerNickname(bidderNickname);
+//        List<Item> allBidderItems = items.orElseThrow(ItemNotFoundException::new);
+        List<Item> allBidderItems = bidder.getItems();
         return  allBidderItems.stream()
                 .map(item -> ItemDTO.builder()
                         .id(item.getId())
                         .name(item.getName())
                         .description(item.getDescription())
-                        .ownerNickname(item.getOwnerNickname())
+                        .ownerNickname(item.getOwner().getNickname())
                         .build()
                 ).collect(Collectors.toList());
     }
@@ -84,7 +83,7 @@ public class BidderServiceImpl implements BidderService {
             throws ItemAlreadyExistException, BidderNotFoundException {
 
         bidderRepository.findOptionalByNickname(bidderNickname).
-                orElseThrow(BidderNotFoundException::new);//need to throw exception
+                orElseThrow(BidderNotFoundException::new);
         Item item = mapper.map(itemRequest, Item.class);
         itemRepository.save(item);
         return itemRequest;

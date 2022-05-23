@@ -10,7 +10,6 @@ import java.util.Objects;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BidderDTO {
-    private Long id;
 
     private String name;
     private String money;

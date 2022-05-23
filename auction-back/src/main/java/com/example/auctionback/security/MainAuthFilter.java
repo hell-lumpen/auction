@@ -89,7 +89,7 @@ public class MainAuthFilter implements Filter {
                 new SimpleGrantedAuthority("BASE_USER")
         );
 
-        return new OurAuthToken(bidder.getId(), bidder, authorities);
+        return new OurAuthToken(bidder.getNickname(), bidder, authorities);
     }
 
 

@@ -27,6 +27,7 @@ public class Lot {
     private String startCost;
     private String minBidIncrease;
 
+    ;
     private String ownerNickname;
 
     private boolean lotStatus = false;

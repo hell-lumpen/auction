@@ -281,7 +281,7 @@ public class LotService {
 
         if (lot.getLastOrderId() != null){
             Order currentOrder = orderRepository.findByOrderId(lot.getLastOrderId());
-            String userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwnerNickname(); // get owner id item
+            String userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwner().getNickname(); // get owner id item
             this.transferMoney(currentOrder.getOrderOwnerNickname(), userId,
                     new MoneyValue(currentOrder.getOrderPrice()));
             this.transferItem(currentOrder.getOrderOwnerNickname(), lot.getItemId());
@@ -331,7 +331,7 @@ public class LotService {
 
     private void transferItem(String destinationNickname, Long itemId){
         Item item = itemRepository.findById(itemId).orElseThrow();
-        item.setOwnerNickname(destinationNickname);
+        item.setOwner(bidderRepository.findOptionalByNickname(destinationNickname).orElseThrow());
         itemRepository.save(item);
     }
 

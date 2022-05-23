@@ -56,7 +56,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         bidder.setPassword(password);
         bidderRepository.save(bidder);
         return(BidderDTO.builder()
-                .id(bidder.getId())
                 .name(bidder.getName())
                 .money(bidder.getMoney())
                 .reservedMoney("0")

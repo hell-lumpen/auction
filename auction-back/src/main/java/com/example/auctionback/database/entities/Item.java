@@ -18,5 +18,8 @@ public class Item {
 
     private String name;
     private String description;
-    private String ownerNickname;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_nickname", nullable = false)
+    private Bidder owner;
+//    private String ownerNickname;
 }
