@@ -55,34 +55,50 @@ public class LotService {
 
         lotDTO.setOwnerNickname(token.getPrincipal().getNickname());
         lotDTO.setCurrentCost(lotDTO.getStartCost());
-        Lot lot = mapper.map(lotDTO, Lot.class);
+
+
+//        Lot lot = mapper.map(lotDTO, Lot.class);
+        Lot lot =  Lot.builder()
+                .id(lotDTO.getId())
+                .title(lotDTO.getTitle())
+                .description(lotDTO.getDescription())
+                .item(itemRepository.findById(lotDTO.getItemId()).orElseThrow())
+                .startCost(lotDTO.getStartCost())
+                .minBidIncrease(lotDTO.getMinBidIncrease())
+                .ownerNickname(lotDTO.getOwnerNickname())
+                .build();
+
         lot.setCreateAt(LocalDateTime.now());
         LocalDateTime localDateTime = LocalDateTime.parse(lotDTO.getFinishAt(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         lot.setFinishAt(localDateTime);
         lotRepository.save(lot);
         lotDTO.setId(lot.getId());
 
+
+        LotDTO lotDTO1 = LotDTO.builder()
+                .id(lot.getId())
+                .title(lot.getTitle())
+                .description(lot.getDescription())
+                .itemId(lot.getItem().getId())
+                .minBidIncrease(lot.getMinBidIncrease())
+                .ownerNickname(lot.getOwnerNickname())
+                .startCost(lot.getStartCost())
+                .currentCost(lot.getStartCost())
+                .finishAt(lot.getFinishAt().toString())
+                .build();
         // todo: mapper https://www.baeldung.com/entity-to-and-from-dto-for-a-java-spring-application
-        return lotDTO;
+        return lotDTO1;
 
     }
 
     public LotDTO getLot(Long lotId, OurAuthToken token) throws LotNotFoundException {
         Lot lot = lotRepository.findById(lotId).orElseThrow(LotNotFoundException::new);
-        String currentCost;
-        if (lot.getLastOrderId() != null) {
-            var lastOrder = orderRepository.findByOrderId(lot.getLastOrderId());
-            currentCost = lastOrder.getOrderPrice();
-        }
-        else {
-            currentCost = lot.getStartCost();
-        }
-
+        String currentCost = getCurrentCost(lot);
         return LotDTO.builder()
-                .id(lot.getItemId())
+                .id(lot.getId())
                 .title(lot.getTitle())
                 .description(lot.getDescription())
-                .itemId(lot.getItemId())
+                .itemId(lot.getItem().getId())
                 .startCost(lot.getStartCost())
                 .currentCost(currentCost)
                 .finishAt(lot.getFinishAt().toString())
@@ -92,25 +108,33 @@ public class LotService {
     }
 
     private String getCurrentCost(Lot lot){
-        if (lot.getLastOrderId()!= null){
-            return orderRepository.findByOrderId(lot.getLastOrderId()).getOrderPrice();
+
+        List<Order> orders = lot.getOrders();
+        if (orders.isEmpty()){
+            return lot.getStartCost();
         }
         else{
-            return lot.getStartCost();
+            Order currentOrder = null;
+            for(Order order:orders){
+                if (order.getOrderStatus()){
+                    currentOrder = order;
+                    break;
+                }
+            }
+
+            return currentOrder.getOrderPrice();
         }
     }
 
     public List<LotDTO> getAllLots() {
         List<Lot> allLots = (List<Lot>) lotRepository.findAll();
-
-
         return allLots.stream()
                 .map(lot -> {
                     return LotDTO.builder()
                             .id(lot.getId())
                             .title(lot.getTitle())
                             .description(lot.getDescription())
-                            .itemId(lot.getItemId())
+                            .itemId(lot.getItem().getId())
                             .finishAt(lot.getFinishAt().toString())
                             .startCost(lot.getStartCost())
                             .currentCost(getCurrentCost(lot))
@@ -122,14 +146,14 @@ public class LotService {
     }
 
     public OrderDTO updateAuction(Long auctionId, OrderDTO bidRequest, OurAuthToken token)
-            throws LotNotFoundException, BidderNotFoundException, NotEnoughMoneyException, DataNotCorrectException, InvalidOrderPriceException, ParticipateInYourAuctionException {
+            throws LotNotFoundException, BidderNotFoundException, NotEnoughMoneyException,
+            DataNotCorrectException, InvalidOrderPriceException, ParticipateInYourAuctionException {
 
-        List<Order> allOrders = orderRepository.findByAuctionId(auctionId);
 
         bidRequest.setAuctionId(auctionId);
         bidRequest.setOrderOwnerNickname(token.getPrincipal().getNickname());
         bidRequest.setCreatedAt(LocalDateTime.now());
-        var lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
+        Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
         if (lot.isLotStatus())
             throw new DataNotCorrectException();//todo:поменять на ошибку о том, что аукцион закончился
 
@@ -137,14 +161,23 @@ public class LotService {
             throw new ParticipateInYourAuctionException();
         }
 
-        bidRequest.setItemId(lot.getItemId());
+        bidRequest.setItemId(lot.getItem().getId());
 
         MoneyValue bidRequestMoney = new MoneyValue(bidRequest.getOrderPrice());
         MoneyValue minBidIncreaseMoney = new MoneyValue(lot.getMinBidIncrease());
 
-        if (lot.getLastOrderId() != null) {
-            Order nowOrderLot = orderRepository.findById(lot.getLastOrderId()).orElseThrow();
-            minBidIncreaseMoney = minBidIncreaseMoney.Add(new MoneyValue(nowOrderLot.getOrderPrice()));
+
+        List<Order> orders = lot.getOrders();
+        Order currentOrder = null;
+        for (Order order : orders){
+            if (order.getOrderStatus()){
+                currentOrder = order;
+                break;
+            }
+        }
+
+        if (currentOrder != null) {
+            minBidIncreaseMoney = minBidIncreaseMoney.Add(new MoneyValue(currentOrder.getOrderPrice()));
         }else
             minBidIncreaseMoney = minBidIncreaseMoney.Add(new MoneyValue(lot.getStartCost()));
 
@@ -153,11 +186,17 @@ public class LotService {
             throw new InvalidOrderPriceException();
         }
 
-        Order newOrder = mapper.map(bidRequest, Order.class);
+//        Order newOrder = mapper.map(bidRequest, Order.class);
+        Order newOrder = Order.builder()
+                .orderOwnerNickname(bidRequest.getOrderOwnerNickname())
+                .orderPrice(bidRequest.getOrderPrice())
+                .itemId(bidRequest.getItemId())
+                .lot(lotRepository.findById(bidRequest.getAuctionId()).orElseThrow())
+                .createdAt(bidRequest.getCreatedAt())
+                .build();
         MoneyValue newMoney = new MoneyValue(newOrder.getOrderPrice());
 
-        if (lot.getLastOrderId() != null) {
-            Order currentOrder = orderRepository.findByOrderId(lot.getLastOrderId());
+        if (currentOrder != null) {
             MoneyValue currentMoney = new MoneyValue(currentOrder.getOrderPrice());
             if (newMoney.lessThen(currentMoney)) {
                 throw new NotEnoughMoneyException();
@@ -172,9 +211,9 @@ public class LotService {
 
 
         newOrder.setOrderStatus(true);
+        newOrder.setLot(lot);
         this.lockMoney(newOrder.getOrderOwnerNickname(), newMoney);
         orderRepository.save(newOrder);
-        lot.setLastOrderId(newOrder.getOrderId());
         lotRepository.save(lot);
 
         return OrderDTO.builder()
@@ -182,66 +221,10 @@ public class LotService {
                 .orderOwnerNickname(newOrder.getOrderOwnerNickname())
                 .orderPrice(newOrder.getOrderPrice())
                 .itemId(newOrder.getItemId())
-                .auctionId(newOrder.getAuctionId())
+                .auctionId(newOrder.getLot().getId())
                 .createdAt(newOrder.getCreatedAt())
                 .orderStatus(newOrder.getOrderStatus())
                 .build();
-
-
-        /*Order currentOrder = null;
-        for (var o : allOrders) {
-            if (o.getOrderStatus()) {
-                currentOrder = o;
-                break;
-            }
-        }
-
-        Order newOrder = mapper.map(bidRequest, Order.class);
-        newOrder.setCreatedAt(new Date());
-        newOrder.setOrderStatus(false);
-        System.out.println(newOrder.getOrderId());
-        if (currentOrder == null) {
-            MoneyValue newMoney = new MoneyValue(newOrder.getOrderPrice());
-            this.lockMoney(newOrder.getOrderOwnerNickname(), newMoney);
-            orderRepository.save(newOrder);
-            lot.setLastOrderId(newOrder.getOrderId());
-            lotRepository.save(lot);
-            return OrderDTO.builder()
-                    .orderId(newOrder.getOrderId())
-                    .orderOwnerNickname(newOrder.getOrderOwnerNickname())
-                    .orderPrice(newOrder.getOrderPrice())
-                    .itemId(newOrder.getItemId())
-                    .auctionId(newOrder.getAuctionId())
-                    .createdAt(newOrder.getCreatedAt())
-                    .orderStatus(newOrder.getOrderStatus())
-                    .build();
-        }
-
-        MoneyValue newMoney = new MoneyValue(newOrder.getOrderPrice());
-        MoneyValue currentMoney = new MoneyValue(currentOrder.getOrderPrice());
-
-        if (newMoney.lessThen(currentMoney))
-            throw new NotEnoughMoneyException();
-
-
-        newOrder.setOrderStatus(true);
-
-        currentOrder.setOrderStatus(false);
-        this.unlockMoney(currentOrder.getOrderOwnerNickname(), currentMoney);
-        this.lockMoney(newOrder.getOrderOwnerNickname(), newMoney);
-        orderRepository.save(currentOrder);
-        orderRepository.save(newOrder);
-        lot.setLastOrderId(newOrder.getOrderId());
-        lotRepository.save(lot);
-        return OrderDTO.builder()
-                .orderId(newOrder.getOrderId())
-                .orderOwnerNickname(newOrder.getOrderOwnerNickname())
-                .orderPrice(newOrder.getOrderPrice())
-                .itemId(newOrder.getItemId())
-                .auctionId(newOrder.getAuctionId())
-                .createdAt(newOrder.getCreatedAt())
-                .orderStatus(newOrder.getOrderStatus())
-                .build();*/
 
 
     }
@@ -251,40 +234,35 @@ public class LotService {
     private void checkTimeForFinishAuction()
             throws LotNotFoundException{
         System.out.println("hui");
-        var lots = lotRepository.findAllByLotStatus(false);
-        for (var lot : lots) {
-            if (!lot.getFinishAt().isAfter(LocalDateTime.now())){
-                finishAuction(lot.getId());
+        List<Lot> lots = lotRepository.findAllByLotStatus(false);
+        for (Lot lot : lots) {
+            if (lot.getFinishAt().isBefore(LocalDateTime.now())){
+                finishAuction(lot);
             }
         }
     }
 
 
-
-
-    public String finishAuction(Long auctionId)
+    public String finishAuction(Lot lot)
             throws LotNotFoundException {
 
-        Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
-
-//        List<Order> allOrders = orderRepository.findByAuctionId(auctionId);
-//        Order currentOrder = null;
-//        for (var order : allOrders) {
-//            if (order.getOrderStatus()) {
-//                currentOrder = order;
-//                break;
-//            }
-//        }
-
-//        lot.setFinishAt(new Date());
+        List<Order> orders = lot.getOrders();
+        Order currentOrder = null;
+        System.out.println(1);
+        for (Order order : orders) {
+            if (order.getOrderStatus()) {
+                currentOrder = order;
+                break;
+            }
+        }
+        System.out.println(2);
         lot.setLotStatus(true); // its can sell
 
-        if (lot.getLastOrderId() != null){
-            Order currentOrder = orderRepository.findByOrderId(lot.getLastOrderId());
-            String userId = itemRepository.findById(lot.getItemId()).orElseThrow().getOwner().getNickname(); // get owner id item
-            this.transferMoney(currentOrder.getOrderOwnerNickname(), userId,
+        if (currentOrder != null){
+            String userNickname = lot.getItem().getOwner().getNickname();
+            this.transferMoney(currentOrder.getOrderOwnerNickname(), userNickname,
                     new MoneyValue(currentOrder.getOrderPrice()));
-            this.transferItem(currentOrder.getOrderOwnerNickname(), lot.getItemId());
+            this.transferItem(currentOrder.getOrderOwnerNickname(), lot.getItem().getId());
         }
 
         lotRepository.save(lot);
@@ -336,16 +314,15 @@ public class LotService {
     }
 
     public List<OrderDTO> getAllOrders(Long auctionId) throws LotNotFoundException {
-        lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
-        var orders =  orderRepository.findByAuctionId(auctionId);
-
+        Lot lot = lotRepository.findById(auctionId).orElseThrow(LotNotFoundException::new);
+        List<Order> orders = lot.getOrders();
         return orders.stream()
                 .map(order -> OrderDTO.builder()
                         .orderId(order.getOrderId())
                         .orderOwnerNickname(order.getOrderOwnerNickname())
                         .orderPrice(order.getOrderPrice())
                         .itemId(order.getItemId())
-                        .auctionId(order.getAuctionId())
+                        .auctionId(order.getLot().getId())
                         .createdAt(order.getCreatedAt())
                         .orderStatus(order.getOrderStatus())
                         .build())

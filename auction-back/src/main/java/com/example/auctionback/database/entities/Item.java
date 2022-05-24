@@ -3,6 +3,7 @@ package com.example.auctionback.database.entities;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Setter
@@ -18,8 +19,14 @@ public class Item {
 
     private String name;
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY)
+
+
+    @OneToOne(cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER,
+            mappedBy = "item")
+    private Lot lot;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_nickname", nullable = false)
     private Bidder owner;
-//    private String ownerNickname;
 }

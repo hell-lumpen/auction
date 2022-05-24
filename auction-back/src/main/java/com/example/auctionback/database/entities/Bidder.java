@@ -24,7 +24,7 @@ public class Bidder {
     private String password;
 
     @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
+            fetch = FetchType.EAGER,
             mappedBy = "owner")
     private List<Item> items;
 

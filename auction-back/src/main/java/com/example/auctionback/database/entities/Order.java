@@ -22,7 +22,12 @@ public class Order {
     private String orderOwnerNickname;
     private String orderPrice;
     private Long itemId;
-    private Long auctionId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lot_id", nullable = false)
+    private Lot lot;
+
+//    private Long auctionId;
 
     private LocalDateTime createdAt;
     private boolean orderStatus; // true - текущий ордер или нет
